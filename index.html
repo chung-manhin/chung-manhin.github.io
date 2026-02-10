@@ -1,167 +1,150 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="author" content="chung-manhin">
-
-
     <meta name="subtitle" content="记录学习">
+    <meta name="description" content="机器人工程大学生的学习笔记与技术记录。">
+    <meta name="keywords" content="学习笔记, 机器人, 编程">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1f1f1f" media="(prefers-color-scheme: dark)">
 
+    <link rel="canonical" href="https://chung-manhin.github.io/">
 
-    <meta name="description" content="机器人工程大学生">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="chung-manhin's blog">
+    <meta property="og:description" content="机器人工程大学生的学习笔记与技术记录。">
+    <meta property="og:url" content="https://chung-manhin.github.io/">
+    <meta property="og:site_name" content="chung-manhin's blog">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://chung-manhin.github.io/image/11.jpg">
 
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="chung-manhin's blog">
+    <meta name="twitter:description" content="机器人工程大学生的学习笔记与技术记录。">
+    <meta name="twitter:image" content="https://chung-manhin.github.io/image/11.jpg">
 
-    <meta name="keywords" content="学习笔记">
+    <title>chung-manhin's blog</title>
 
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="preload" as="image" href="/image/11.jpg" fetchpriority="high">
 
-<title>chung-manhin&#39;s blog</title>
-
-
-
-    <link rel="icon" href="/favicon.ico">
-
-
-
-
-    <!-- stylesheets list from _config.yml -->
-    
     <link rel="stylesheet" href="/css/style.css">
-    
 
+    <script defer src="/js/script.js"></script>
+    <script defer src="/js/tocbot.min.js"></script>
 
-
-    <!-- scripts list from _config.yml -->
-    
-    <script src="/js/script.js"></script>
-    
-    <script src="/js/tocbot.min.js"></script>
-    
-
-
-
-    
-    
-        
-    
-
-
-<meta name="generator" content="Hexo 7.3.0"></head>
+    <meta name="generator" content="Hexo 7.3.0">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "chung-manhin's blog",
+      "url": "https://chung-manhin.github.io/",
+      "description": "机器人工程大学生的学习笔记与技术记录。",
+      "author": {
+        "@type": "Person",
+        "name": "chung-manhin"
+      }
+    }
+    </script>
+</head>
 
 <body>
     <script>
-        // this function is used to check current theme before page loaded.
         (() => {
-            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
-            const isDark = currentTheme === 'dark';
-            const pagebody = document.getElementsByTagName('body')[0]
-            if (isDark) {
+            const currentTheme = (window.localStorage && window.localStorage.getItem('theme')) || '';
+            const pagebody = document.body;
+            if (!pagebody) return;
+            if (currentTheme === 'dark') {
                 pagebody.classList.add('dark-theme');
-                // mobile
-                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
             } else {
                 pagebody.classList.remove('dark-theme');
-                // mobile
-                document.getElementById("mobile-toggle-theme").innerText = "· Light"
             }
         })();
     </script>
 
     <div class="wrapper">
         <header>
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-header header-logo"><a href="/">chung-manhin&#39;s Blog</a></div>
-            <div class="menu navbar-right">
-                
-                    <a class="menu-item" href="/archives">Posts</a>
-                
-                    <a class="menu-item" href="/categories">Categories</a>
-                
-                    <a class="menu-item" href="/tags">Tags</a>
-                
-                    <a class="menu-item" href="/about">About</a>
-                
-                <input id="switch_default" type="checkbox" class="switch_default">
-                <label for="switch_default" class="toggleBtn"></label>
-            </div>
-        </div>
-    </nav>
-
-    
-    <nav class="navbar-mobile" id="nav-mobile">
-        <div class="container">
-            <div class="navbar-header">
-                <div>
-                    <a href="/">chung-manhin&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+            <nav class="navbar">
+                <div class="container">
+                    <div class="navbar-header header-logo"><a href="/">chung-manhin's Blog</a></div>
+                    <div class="menu navbar-right">
+                        <a class="menu-item" href="/archives">Posts</a>
+                        <a class="menu-item" href="/categories">Categories</a>
+                        <a class="menu-item" href="/tags">Tags</a>
+                        <a class="menu-item" href="/about">About</a>
+                        <input id="switch_default" type="checkbox" class="switch_default">
+                        <label for="switch_default" class="toggleBtn"></label>
+                    </div>
                 </div>
-                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </nav>
+
+            <nav class="navbar-mobile" id="nav-mobile">
+                <div class="container">
+                    <div class="navbar-header">
+                        <div>
+                            <a href="/">chung-manhin's Blog</a><a id="mobile-toggle-theme">· Light</a>
+                        </div>
+                        <button class="menu-toggle" type="button" onclick="mobileBtn()" aria-controls="mobile-menu" aria-expanded="false">☰ Menu</button>
+                    </div>
+                    <div class="menu" id="mobile-menu">
+                        <a class="menu-item" href="/archives">Posts</a>
+                        <a class="menu-item" href="/categories">Categories</a>
+                        <a class="menu-item" href="/tags">Tags</a>
+                        <a class="menu-item" href="/about">About</a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <script>
+            var mobileBtn = function () {
+                var toggleMenu = document.getElementsByClassName('menu-toggle')[0];
+                var mobileMenu = document.getElementById('mobile-menu');
+                var isActive = toggleMenu.classList.contains('active');
+                if (isActive) {
+                    toggleMenu.classList.remove('active');
+                    mobileMenu.classList.remove('active');
+                    toggleMenu.setAttribute('aria-expanded', 'false');
+                } else {
+                    toggleMenu.classList.add('active');
+                    mobileMenu.classList.add('active');
+                    toggleMenu.setAttribute('aria-expanded', 'true');
+                }
+            };
+
+            (function updateThemeText() {
+                var mobileThemeLabel = document.getElementById('mobile-toggle-theme');
+                if (!mobileThemeLabel) return;
+                var isDark = document.body.classList.contains('dark-theme');
+                mobileThemeLabel.textContent = isDark ? '· Dark' : '· Light';
+            })();
+        </script>
+        <main class="main">
+            <div class="container">
+                <div class="intro">
+                    <div class="avatar">
+                        <a href="/archives"><img src="/image/11.jpg" alt="wenxuan avatar" width="300" height="300" loading="eager" decoding="async"></a>
+                    </div>
+                    <h1 class="nickname">wenxuan</h1>
+                    <div class="description"><p>Learn!</p></div>
+                    <div class="links">
+                        <a class="link-item" title="Blog" href="/archives" aria-label="Go to posts archive">
+                            <i class="iconfont icon-blog" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="menu" id="mobile-menu">
-                
-                    <a class="menu-item" href="/archives">Posts</a>
-                
-                    <a class="menu-item" href="/categories">Categories</a>
-                
-                    <a class="menu-item" href="/tags">Tags</a>
-                
-                    <a class="menu-item" href="/about">About</a>
-                
+        </main>
+        <footer id="footer" class="footer">
+            <div class="copyright">
+                <span>© chung-manhin | Powered by <a href="https://hexo.io" target="_blank" rel="noopener noreferrer">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank" rel="noopener noreferrer">Chic</a></span>
             </div>
-        </div>
-    </nav>
-
-</header>
-<script>
-    var mobileBtn = function f() {
-        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
-        var mobileMenu = document.getElementById("mobile-menu");
-        if(toggleMenu.classList.contains("active")){
-           toggleMenu.classList.remove("active")
-            mobileMenu.classList.remove("active")
-        }else{
-            toggleMenu.classList.add("active")
-            mobileMenu.classList.add("active")
-        }
-    }
-</script>
-            <div class="main">
-                
-    <div class="container">
-    <div class="intro">
-        <div class="avatar">
-            <a href="/archives"><img src="/image/11.jpg"></a>
-        </div>
-        <div class="nickname">wenxuan</div>
-        <div class="description"><p>Learn！</p>
-</div>
-        <div class="links">
-            
-                
-                    <a class="link-item" title="Blog" href="/archives">
-                        
-                        
-                            <i class="iconfont icon-blog"></i>
-                        
-                    </a>
-                
-            
-        </div>
-    </div>
-</div>
-
-
-            </div>
-            <footer id="footer" class="footer">
-    <div class="copyright">
-        <span>© chung-manhin | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
-    </div>
-</footer>
-
+        </footer>
     </div>
 </body>
 
