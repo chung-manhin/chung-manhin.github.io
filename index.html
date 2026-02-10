@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="author" content="chung-manhin">
     <meta name="subtitle" content="记录学习">
@@ -12,6 +13,7 @@
     <meta name="robots" content="index,follow">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#1f1f1f" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <link rel="canonical" href="https://chung-manhin.github.io/">
 
@@ -22,6 +24,7 @@
     <meta property="og:site_name" content="chung-manhin's blog">
     <meta property="og:locale" content="zh_CN">
     <meta property="og:image" content="https://chung-manhin.github.io/image/11.jpg">
+    <meta property="og:image:alt" content="chung-manhin blog avatar">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="chung-manhin's blog">
@@ -33,10 +36,20 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="preload" as="image" href="/image/11.jpg" fetchpriority="high">
 
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'dark') {
+                    document.documentElement.classList.add('dark-theme');
+                }
+            } catch (e) { }
+        })();
+    </script>
+
     <link rel="stylesheet" href="/css/style.css">
 
     <script defer src="/js/script.js"></script>
-    <script defer src="/js/tocbot.min.js"></script>
 
     <meta name="generator" content="Hexo 7.3.0">
     <script type="application/ld+json">
@@ -55,22 +68,9 @@
 </head>
 
 <body>
-    <script>
-        (() => {
-            const currentTheme = (window.localStorage && window.localStorage.getItem('theme')) || '';
-            const pagebody = document.body;
-            if (!pagebody) return;
-            if (currentTheme === 'dark') {
-                pagebody.classList.add('dark-theme');
-            } else {
-                pagebody.classList.remove('dark-theme');
-            }
-        })();
-    </script>
-
     <div class="wrapper">
         <header>
-            <nav class="navbar">
+            <nav class="navbar" aria-label="Primary navigation">
                 <div class="container">
                     <div class="navbar-header header-logo"><a href="/">chung-manhin's Blog</a></div>
                     <div class="menu navbar-right">
@@ -84,11 +84,11 @@
                 </div>
             </nav>
 
-            <nav class="navbar-mobile" id="nav-mobile">
+            <nav class="navbar-mobile" id="nav-mobile" aria-label="Mobile navigation">
                 <div class="container">
                     <div class="navbar-header">
                         <div>
-                            <a href="/">chung-manhin's Blog</a><a id="mobile-toggle-theme">· Light</a>
+                            <a href="/">chung-manhin's Blog</a><a id="mobile-toggle-theme" role="button" tabindex="0" aria-live="polite">· Light</a>
                         </div>
                         <button class="menu-toggle" type="button" onclick="mobileBtn()" aria-controls="mobile-menu" aria-expanded="false">☰ Menu</button>
                     </div>
@@ -128,7 +128,7 @@
             <div class="container">
                 <div class="intro">
                     <div class="avatar">
-                        <a href="/archives"><img src="/image/11.jpg" alt="wenxuan avatar" width="300" height="300" loading="eager" decoding="async"></a>
+                        <a href="/archives"><img src="/image/11.jpg" alt="wenxuan avatar" width="300" height="300" loading="eager" decoding="async" fetchpriority="high"></a>
                     </div>
                     <h1 class="nickname">wenxuan</h1>
                     <div class="description"><p>Learn!</p></div>

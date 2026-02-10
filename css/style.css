@@ -1274,7 +1274,7 @@ header label {
   overflow-x: auto;
 }
 .post-content figure.highlight .gutter {
-  color: $hight-gutter;
+  color: #9aa0a6;
 }
 .post-content figure.highlight pre {
   background: #f7f7f7;
@@ -1360,4 +1360,187 @@ header label {
 .post-content pre .keyword,
 .post-content pre .javascript .function {
   color: #8959a8;
+}
+
+/* ---- Home polish patch ---- */
+:root {
+  --focus-color: #1f7a9a;
+  --text-main: #161209;
+  --text-muted: #5d5d66;
+  --surface: #ffffff;
+  --surface-dark: #292a2d;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.dark-theme body,
+body.dark-theme {
+  background-color: var(--surface-dark);
+  color: #a9a9b3;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+.toggleBtn:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.main .container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.intro {
+  margin-top: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.intro .avatar img {
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.nickname {
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+.description p {
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.navbar .menu .menu-item,
+.navbar-mobile .menu .menu-item {
+  padding: 0.15rem 0.35rem;
+}
+
+.navbar-mobile .container .navbar-header .menu-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+}
+
+.navbar-mobile .container .menu {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+  display: block;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.navbar-mobile .container .menu.active {
+  max-height: 220px;
+  opacity: 1;
+  transform: translateY(0);
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+@media screen and (max-width: 767px) {
+  body {
+    font-size: 10.5pt;
+    line-height: 1.9;
+  }
+
+  .navbar-mobile {
+    display: block;
+  }
+
+  .navbar {
+    display: none;
+  }
+
+  .intro {
+    margin-top: 0.75rem;
+  }
+
+  .intro .avatar img {
+    width: 220px;
+    height: 220px;
+  }
+
+  .footer {
+    padding-top: 1.25rem;
+    height: auto;
+  }
+}
+
+/* ---- Reading quality patch ---- */
+.post-content {
+  font-size: 1.04rem;
+  line-height: 1.92;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+}
+
+.post-content p,
+.post-content li {
+  max-width: 72ch;
+}
+
+.post-content h1,
+.post-content h2,
+.post-content h3 {
+  line-height: 1.35;
+  scroll-margin-top: 5.5rem;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.post-content blockquote {
+  border-left: 4px solid #2d96bd;
+  background: rgba(45, 150, 189, 0.08);
+  margin: 1.2rem 0;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+}
+
+.dark-theme .post-content blockquote,
+html.dark-theme .post-content blockquote {
+  background: rgba(120, 180, 210, 0.12);
+  border-left-color: #78b4d2;
+}
+
+/* ---- Code block polish ---- */
+.post-content pre,
+.post-content figure.highlight,
+.post-content code {
+  border-radius: 8px;
+}
+
+.post-content pre,
+.post-content figure.highlight {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark-theme .post-content pre,
+.dark-theme .post-content figure.highlight,
+html.dark-theme .post-content pre,
+html.dark-theme .post-content figure.highlight {
+  background: #1f2228;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.dark-theme .post-content code,
+html.dark-theme .post-content code {
+  background: #2a2e36;
 }
