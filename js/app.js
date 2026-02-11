@@ -96,20 +96,24 @@
           <div class="post-card-date">${post.date}</div>
           <div class="post-card-title">${post.title}</div>
           <div class="post-card-excerpt">${post.excerpt}</div>
-          <div class="post-card-tags">${tags}</div>
+          <div class="post-card-footer">
+            <div class="post-card-tags">${tags}</div>
+            <span class="post-card-arrow">&rarr;</span>
+          </div>
         </div>`;
     });
 
     contentEl().innerHTML = `
       <div class="view-container">
         <section class="hero">
-          <img class="hero-avatar" src="${SITE.avatar}" alt="${SITE.nickname} avatar" width="120" height="120">
+          <img class="hero-avatar" src="${SITE.avatar}" alt="${SITE.nickname} avatar" width="110" height="110">
           <h1>${SITE.nickname}</h1>
           <p class="subtitle">${SITE.subtitle}</p>
+          <p class="hero-desc">${SITE.description}</p>
         </section>
         <section class="posts-section">
           <h2 class="section-title">最新文章</h2>
-          <div class="posts-grid">${cards || '<p>暂无文章</p>'}</div>
+          <div class="posts-grid">${cards || '<p style="color:var(--color-text-secondary)">暂无文章</p>'}</div>
         </section>
       </div>`;
     reobserve();
@@ -249,7 +253,8 @@
           <h1>关于我</h1>
           <div class="about-content">
             <p>你好！我是 <strong>${SITE.nickname}</strong>，一名机器人工程大学生。</p>
-            <p>这个博客用来记录我的学习笔记、技术探索和项目经历。</p>
+            <p>这个博客用来记录我的学习笔记、技术探索和项目经历。希望这些内容对你也有所帮助。</p>
+            <p>目前关注的方向：机器人技术、嵌入式开发、Web 前端。</p>
             <p>如果你有任何问题或想法，欢迎在文章下方留言交流。</p>
           </div>
         </div>
