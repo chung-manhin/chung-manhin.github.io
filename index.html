@@ -11,8 +11,8 @@
     <meta name="description" content="机器人工程大学生的学习笔记与技术记录。">
     <meta name="keywords" content="学习笔记, 机器人, 编程">
     <meta name="robots" content="index,follow">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#F5F0E8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1A1916" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <link rel="canonical" href="https://chung-manhin.github.io/">
@@ -36,12 +36,11 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
 
     <!-- Preload critical assets -->
-    <link rel="preload" as="image" href="/image/11.jpg" fetchpriority="high">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Google Fonts: Noto Serif SC + Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Playfair Display + Lora + Noto Serif SC + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
 
     <!-- highlight.js theme -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
@@ -79,60 +78,39 @@
 </head>
 
 <body>
-    <!-- ====== Navigation ====== -->
-    <nav class="site-nav" aria-label="Primary navigation">
-        <div class="nav-inner">
-            <a class="nav-logo" href="#/">chung-manhin's Blog</a>
-            <div class="nav-links">
+    <!-- ====== Newspaper Masthead ====== -->
+    <header class="masthead">
+        <div class="masthead-inner">
+            <div class="masthead-rule double"></div>
+            <div class="masthead-brand">
+                <div class="masthead-title"><a href="#/">Chung-Manhin</a></div>
+                <div class="masthead-subtitle">机器人工程大学生的学习笔记与技术记录</div>
+            </div>
+            <div class="masthead-rule"></div>
+            <nav class="masthead-nav" aria-label="Primary navigation">
                 <a href="#/">首页</a>
+                <span class="nav-dot">&#183;</span>
                 <a href="#/archives">归档</a>
+                <span class="nav-dot">&#183;</span>
                 <a href="#/tags">标签</a>
+                <span class="nav-dot">&#183;</span>
                 <a href="#/about">关于</a>
-                <button class="nav-search-btn" onclick="BlogSearch.open()" aria-label="搜索">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    搜索 <kbd>Ctrl+K</kbd>
-                </button>
+                <span class="nav-dot">&#183;</span>
+                <button class="nav-search-btn" onclick="BlogSearch.open()" aria-label="搜索">搜索</button>
                 <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
-                    <span id="theme-icon">🌙</span>
+                    <span id="theme-icon">&#9790;</span>
                 </button>
-            </div>
-            <div class="nav-right-mobile">
-                <button class="theme-toggle" id="theme-toggle-mobile" aria-label="切换主题">
-                    <span>🌙</span>
-                </button>
-                <button class="nav-mobile-toggle" onclick="BlogSearch.open()" aria-label="搜索">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                </button>
-            </div>
+            </nav>
+            <div class="masthead-rule thin"></div>
         </div>
-    </nav>
+    </header>
 
     <!-- ====== Mobile Bottom Tab Bar ====== -->
     <nav class="mobile-tab-bar" aria-label="Mobile navigation">
-        <a href="#/">
-            <span class="tab-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            </span>
-            首页
-        </a>
-        <a href="#/archives">
-            <span class="tab-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </span>
-            归档
-        </a>
-        <a href="#/tags">
-            <span class="tab-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-            </span>
-            标签
-        </a>
-        <a href="#/about">
-            <span class="tab-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </span>
-            关于
-        </a>
+        <a href="#/">首页</a>
+        <a href="#/archives">归档</a>
+        <a href="#/tags">标签</a>
+        <a href="#/about">关于</a>
     </nav>
 
     <!-- ====== Search Overlay ====== -->
@@ -158,15 +136,11 @@
 
     <!-- ====== Footer ====== -->
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="footer-brand">wenxuan's blog</div>
-            <div class="footer-copyright">© 2025 chung-manhin</div>
-            <div class="footer-stats">
-                <span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">--</span> 次访问</span>
-                <span class="footer-dot">&middot;</span>
-                <span id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">--</span> 位访客</span>
-            </div>
-        </div>
+        <span>&copy; 2025 wenxuan</span>
+        <span class="footer-sep">&middot;</span>
+        <span class="footer-stats">
+            <span id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">--</span> views</span>
+        </span>
     </footer>
 
     <!-- ====== Scripts ====== -->
@@ -185,13 +159,7 @@
     <!-- Mobile theme toggle sync -->
     <script>
         (function () {
-            var mobileToggle = document.getElementById('theme-toggle-mobile');
-            if (!mobileToggle) return;
-            mobileToggle.addEventListener('click', function () {
-                document.getElementById('theme-toggle').click();
-                mobileToggle.querySelector('span').textContent =
-                    document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
-            });
+            // No separate mobile toggle needed — theme-toggle is in masthead
         })();
     </script>
 </body>
