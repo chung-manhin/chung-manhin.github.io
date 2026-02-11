@@ -14,9 +14,9 @@
     avatar: '/image/11.jpg',
     giscus: {
       repo: 'chung-manhin/chung-manhin.github.io',
-      repoId: '',
+      repoId: 'R_kgDOPNngSw',
       category: 'Announcements',
-      categoryId: '',
+      categoryId: 'DIC_kwDOPNngS84C2NM0',
     }
   };
 
@@ -158,6 +158,19 @@
       const html = marked.parse(md);
       const tags = post.tags.map(t => `<span class="tag">${t}</span>`).join('');
 
+      // Prev / Next post navigation
+      const idx = postsData.indexOf(post);
+      const newer = idx > 0 ? postsData[idx - 1] : null;
+      const older = idx < postsData.length - 1 ? postsData[idx + 1] : null;
+      let postNav = '<nav class="post-nav">';
+      postNav += older
+        ? `<a class="post-nav-item post-nav-prev" href="#/post/${encodeURIComponent(older.slug)}"><span class="post-nav-label">\u2190 \u4E0A\u4E00\u7BC7</span><span class="post-nav-title">${older.title}</span></a>`
+        : '<span class="post-nav-item"></span>';
+      postNav += newer
+        ? `<a class="post-nav-item post-nav-next" href="#/post/${encodeURIComponent(newer.slug)}"><span class="post-nav-label">\u4E0B\u4E00\u7BC7 \u2192</span><span class="post-nav-title">${newer.title}</span></a>`
+        : '<span class="post-nav-item"></span>';
+      postNav += '</nav>';
+
       contentEl().innerHTML = `
         <div class="view-container">
           <div class="article-back"><a href="#/">&larr; \u8FD4\u56DE</a></div>
@@ -174,19 +187,56 @@
           <div class="article-reading-count">
             <span id="busuanzi_container_page_pv">\u9605\u8BFB <span id="busuanzi_value_page_pv">--</span></span>
           </div>
+          ${postNav}
           <section class="comments-section" id="comments-section">
             <h3>\u8BC4\u8BBA</h3>
             <div id="giscus-container"></div>
           </section>
         </div>`;
 
+      // Code copy buttons
       document.querySelectorAll('.article-body pre code').forEach(block => {
         hljs.highlightElement(block);
+        const pre = block.parentElement;
+        pre.style.position = 'relative';
+        const btn = document.createElement('button');
+        btn.className = 'code-copy-btn';
+        btn.textContent = '\u590D\u5236';
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(block.textContent).then(() => {
+            btn.textContent = '\u2713 \u5DF2\u590D\u5236';
+            setTimeout(() => { btn.textContent = '\u590D\u5236'; }, 1500);
+          });
+        });
+        pre.appendChild(btn);
       });
+
+      // Image lightbox
+      document.querySelectorAll('.article-body img').forEach(img => {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', () => openLightbox(img.src));
+      });
+
       loadGiscus(post.slug);
     } catch (e) {
       contentEl().innerHTML = `<div class="view-container"><div class="article-header"><h1 class="article-title">\u52A0\u8F7D\u5931\u8D25</h1><p>${e.message}</p></div></div>`;
     }
+  }
+
+  /* ── Lightbox ── */
+  function openLightbox(src) {
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.innerHTML = `<img src="${src}" class="lightbox-img">`;
+    overlay.addEventListener('click', () => {
+      overlay.classList.add('closing');
+      setTimeout(() => overlay.remove(), 250);
+    });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { overlay.click(); document.removeEventListener('keydown', esc); }
+    });
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('active'));
   }
 
   /* ── Archives ── */
@@ -255,8 +305,32 @@
           <div class="about-content">
             <p>\u4F60\u597D\uFF01\u6211\u662F <strong>${SITE.nickname}</strong>\uFF0C\u4E00\u540D\u673A\u5668\u4EBA\u5DE5\u7A0B\u5927\u5B66\u751F\u3002</p>
             <p>\u8FD9\u4E2A\u535A\u5BA2\u7528\u6765\u8BB0\u5F55\u6211\u7684\u5B66\u4E60\u7B14\u8BB0\u3001\u6280\u672F\u63A2\u7D22\u548C\u9879\u76EE\u7ECF\u5386\u3002\u5E0C\u671B\u8FD9\u4E9B\u5185\u5BB9\u5BF9\u4F60\u4E5F\u6709\u6240\u5E2E\u52A9\u3002</p>
-            <p>\u76EE\u524D\u5173\u6CE8\u7684\u65B9\u5411\uFF1A\u673A\u5668\u4EBA\u6280\u672F\u3001\u5D4C\u5165\u5F0F\u5F00\u53D1\u3001Web \u524D\u7AEF\u3002</p>
-            <p>\u5982\u679C\u4F60\u6709\u4EFB\u4F55\u95EE\u9898\u6216\u60F3\u6CD5\uFF0C\u6B22\u8FCE\u5728\u6587\u7AE0\u4E0B\u65B9\u7559\u8A00\u4EA4\u6D41\u3002</p>
+
+            <h2>\u6280\u672F\u6808</h2>
+            <div class="about-skills">
+              <span class="about-skill">\uD83E\uDD16 ROS2</span>
+              <span class="about-skill">\uD83D\uDD27 STM32 / \u5D4C\u5165\u5F0F</span>
+              <span class="about-skill">\uD83D\uDC0D Python</span>
+              <span class="about-skill">\u2699\uFE0F C/C++</span>
+              <span class="about-skill">\uD83C\uDF10 HTML/CSS/JS</span>
+              <span class="about-skill">\uD83D\uDCE6 Git</span>
+              <span class="about-skill">\uD83D\uDC27 Linux</span>
+              <span class="about-skill">\uD83D\uDCC8 MATLAB</span>
+            </div>
+
+            <h2>\u5173\u6CE8\u65B9\u5411</h2>
+            <ul>
+              <li>\u673A\u5668\u4EBA\u6280\u672F\uFF1ASLAM\u3001\u8FD0\u52A8\u5B66\u3001\u63A7\u5236\u7B97\u6CD5</li>
+              <li>\u5D4C\u5165\u5F0F\u5F00\u53D1\uFF1ASTM32\u3001\u4E32\u53E3\u901A\u4FE1\u3001PID \u63A7\u5236</li>
+              <li>Web \u524D\u7AEF\uFF1A\u6027\u80FD\u4F18\u5316\u3001\u52A8\u753B\u3001\u5DE5\u7A0B\u5316</li>
+            </ul>
+
+            <h2>\u8054\u7CFB</h2>
+            <p>
+              <a href="https://github.com/chung-manhin" target="_blank" rel="noopener">GitHub</a>
+              <span style="margin: 0 0.5rem; opacity: 0.3">|</span>
+              \u6587\u7AE0\u4E0B\u65B9\u7559\u8A00\u4EA4\u6D41
+            </p>
           </div>
         </div>
       </div>`;
