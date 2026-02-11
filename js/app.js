@@ -303,16 +303,21 @@
 
   /* ── Scroll Reveal ── */
   let observer;
+  const isTouchDevice = window.matchMedia('(hover: none)').matches;
+
   function initScrollReveal() {
     if (!('IntersectionObserver' in window)) return;
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('revealed');
-          observer.unobserve(entry.target);
+          // On touch devices, keep observing so cards animate on re-enter
+          if (!isTouchDevice) observer.unobserve(entry.target);
+        } else if (isTouchDevice) {
+          entry.target.classList.remove('revealed');
         }
       });
-    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   }
 
   function reobserve() {

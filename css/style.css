@@ -471,6 +471,28 @@ img { max-width: 100%; height: auto; }
 .post-list .scroll-reveal:nth-child(6) { transition-delay: 0.20s; }
 .post-list .scroll-reveal:nth-child(7) { transition-delay: 0.24s; }
 
+/* Mobile: enhanced scroll animation */
+@media (hover: none) {
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+    transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+                transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .post-list .scroll-reveal:nth-child(2) { transition-delay: 0.06s; }
+  .post-list .scroll-reveal:nth-child(3) { transition-delay: 0.12s; }
+  .post-list .scroll-reveal:nth-child(4) { transition-delay: 0.18s; }
+  .post-list .scroll-reveal:nth-child(5) { transition-delay: 0.24s; }
+  .post-list .scroll-reveal:nth-child(6) { transition-delay: 0.30s; }
+  .post-list .scroll-reveal:nth-child(7) { transition-delay: 0.36s; }
+}
+
 /* =============================================
    ARTICLE PAGE
    ============================================= */
