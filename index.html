@@ -12,7 +12,7 @@
     <meta name="keywords" content="学习笔记, 机器人, 编程">
     <meta name="robots" content="index,follow">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1f1f1f" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <link rel="canonical" href="https://chung-manhin.github.io/">
@@ -34,24 +34,35 @@
     <title>chung-manhin's blog</title>
 
     <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="preload" as="image" href="/image/11.jpg" fetchpriority="high">
 
+    <!-- Preload critical assets -->
+    <link rel="preload" as="image" href="/image/11.jpg" fetchpriority="high">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Google Fonts: Noto Serif SC + Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- highlight.js theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Early dark mode detection (prevent flash) -->
     <script>
         (function () {
             try {
                 var t = localStorage.getItem('theme');
-                if (t === 'dark') {
+                if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark-theme');
+                    document.body && document.body.classList.add('dark-theme');
                 }
             } catch (e) { }
         })();
     </script>
 
-    <link rel="stylesheet" href="/css/style.css">
-
-    <script defer src="/js/script.js"></script>
-
-    <meta name="generator" content="Hexo 7.3.0">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -68,84 +79,110 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <header>
-            <nav class="navbar" aria-label="Primary navigation">
-                <div class="container">
-                    <div class="navbar-header header-logo"><a href="/">chung-manhin's Blog</a></div>
-                    <div class="menu navbar-right">
-                        <a class="menu-item" href="/archives">Posts</a>
-                        <a class="menu-item" href="/categories">Categories</a>
-                        <a class="menu-item" href="/tags">Tags</a>
-                        <a class="menu-item" href="/about">About</a>
-                        <input id="switch_default" type="checkbox" class="switch_default">
-                        <label for="switch_default" class="toggleBtn"></label>
-                    </div>
-                </div>
-            </nav>
-
-            <nav class="navbar-mobile" id="nav-mobile" aria-label="Mobile navigation">
-                <div class="container">
-                    <div class="navbar-header">
-                        <div>
-                            <a href="/">chung-manhin's Blog</a><a id="mobile-toggle-theme" role="button" tabindex="0" aria-live="polite">· Light</a>
-                        </div>
-                        <button class="menu-toggle" type="button" onclick="mobileBtn()" aria-controls="mobile-menu" aria-expanded="false">☰ Menu</button>
-                    </div>
-                    <div class="menu" id="mobile-menu">
-                        <a class="menu-item" href="/archives">Posts</a>
-                        <a class="menu-item" href="/categories">Categories</a>
-                        <a class="menu-item" href="/tags">Tags</a>
-                        <a class="menu-item" href="/about">About</a>
-                    </div>
-                </div>
-            </nav>
-        </header>
-        <script>
-            var mobileBtn = function () {
-                var toggleMenu = document.getElementsByClassName('menu-toggle')[0];
-                var mobileMenu = document.getElementById('mobile-menu');
-                var isActive = toggleMenu.classList.contains('active');
-                if (isActive) {
-                    toggleMenu.classList.remove('active');
-                    mobileMenu.classList.remove('active');
-                    toggleMenu.setAttribute('aria-expanded', 'false');
-                } else {
-                    toggleMenu.classList.add('active');
-                    mobileMenu.classList.add('active');
-                    toggleMenu.setAttribute('aria-expanded', 'true');
-                }
-            };
-
-            (function updateThemeText() {
-                var mobileThemeLabel = document.getElementById('mobile-toggle-theme');
-                if (!mobileThemeLabel) return;
-                var isDark = document.body.classList.contains('dark-theme');
-                mobileThemeLabel.textContent = isDark ? '· Dark' : '· Light';
-            })();
-        </script>
-        <main class="main">
-            <div class="container">
-                <div class="intro">
-                    <div class="avatar">
-                        <a href="/archives"><img src="/image/11.jpg" alt="wenxuan avatar" width="300" height="300" loading="eager" decoding="async" fetchpriority="high"></a>
-                    </div>
-                    <h1 class="nickname">wenxuan</h1>
-                    <div class="description"><p>Learn!</p></div>
-                    <div class="links">
-                        <a class="link-item" title="Blog" href="/archives" aria-label="Go to posts archive">
-                            <i class="iconfont icon-blog" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </div>
+    <!-- ====== Navigation ====== -->
+    <nav class="site-nav" aria-label="Primary navigation">
+        <div class="nav-inner">
+            <a class="nav-logo" href="#/">chung-manhin's Blog</a>
+            <div class="nav-links">
+                <a href="#/">首页</a>
+                <a href="#/archives">归档</a>
+                <a href="#/tags">标签</a>
+                <a href="#/about">关于</a>
+                <a href="#/editor">写作</a>
+                <button class="nav-search-btn" onclick="BlogSearch.open()" aria-label="搜索">
+                    🔍 搜索 <kbd>Ctrl+K</kbd>
+                </button>
+                <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+                    <span id="theme-icon">🌙</span>
+                </button>
             </div>
-        </main>
-        <footer id="footer" class="footer">
-            <div class="copyright">
-                <span>© chung-manhin | Powered by <a href="https://hexo.io" target="_blank" rel="noopener noreferrer">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank" rel="noopener noreferrer">Chic</a></span>
+            <button class="nav-mobile-toggle" onclick="BlogSearch.open()" aria-label="搜索">🔍</button>
+            <button class="theme-toggle" id="theme-toggle-mobile" aria-label="切换主题" style="display:none">
+                <span>🌙</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ====== Mobile Bottom Tab Bar ====== -->
+    <nav class="mobile-tab-bar" aria-label="Mobile navigation">
+        <a href="#/">
+            <span class="tab-icon">🏠</span>
+            首页
+        </a>
+        <a href="#/archives">
+            <span class="tab-icon">📚</span>
+            归档
+        </a>
+        <a href="#/tags">
+            <span class="tab-icon">🏷️</span>
+            标签
+        </a>
+        <a href="#/editor">
+            <span class="tab-icon">✏️</span>
+            写作
+        </a>
+        <a href="#/about">
+            <span class="tab-icon">👤</span>
+            关于
+        </a>
+    </nav>
+
+    <!-- ====== Search Overlay ====== -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-panel">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="search-input" placeholder="搜索文章标题、标签…" autocomplete="off">
+                <button class="search-close" id="search-close">ESC</button>
             </div>
-        </footer>
+            <div class="search-results" id="search-results">
+                <div class="search-empty">输入关键词搜索文章…</div>
+            </div>
+        </div>
     </div>
+
+    <!-- ====== Main Content (SPA renders here) ====== -->
+    <main class="site-content" id="app-content">
+        <div class="loading-spinner"></div>
+    </main>
+
+    <!-- ====== Footer ====== -->
+    <footer class="site-footer">
+        <div>© chung-manhin's blog</div>
+        <div class="footer-stats">
+            <span id="busuanzi_container_site_pv">总访问量: <span id="busuanzi_value_site_pv">--</span></span>
+            &nbsp;|&nbsp;
+            <span id="busuanzi_container_site_uv">总访客数: <span id="busuanzi_value_site_uv">--</span></span>
+        </div>
+    </footer>
+
+    <!-- ====== Scripts ====== -->
+    <!-- marked.js — Markdown parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+    <!-- highlight.js — Code syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Busuanzi — Visitor counter -->
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <!-- App modules -->
+    <script src="/js/search.js"></script>
+    <script src="/js/editor.js"></script>
+    <script src="/js/app.js"></script>
+
+    <!-- Mobile theme toggle (duplicate for mobile nav) -->
+    <script>
+        (function () {
+            var mobileToggle = document.getElementById('theme-toggle-mobile');
+            if (!mobileToggle) return;
+            // Show on mobile
+            if (window.innerWidth <= 768) mobileToggle.style.display = '';
+            mobileToggle.addEventListener('click', function () {
+                document.getElementById('theme-toggle').click();
+                mobileToggle.querySelector('span').textContent =
+                    document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
+            });
+        })();
+    </script>
 </body>
 
 </html>
