@@ -297,8 +297,6 @@ img { max-width: 100%; height: auto; }
 
 /* Featured (first) post */
 .post-card.featured {
-  padding: 2rem 1.5rem;
-  margin-bottom: 1.5rem;
   border-bottom: 2px solid var(--accent);
 }
 
@@ -359,7 +357,7 @@ img { max-width: 100%; height: auto; }
 /* The hovered card pops out */
 .post-list:hover .post-card:hover {
   opacity: 1;
-  transform: translate3d(0,0,0) scale(1.05);
+  transform: translate3d(0,0,0) scale(1.03);
   box-shadow: 0 10px 28px rgba(0,0,0,0.07);
   z-index: 10;
 }
