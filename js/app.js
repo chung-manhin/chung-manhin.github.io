@@ -12,7 +12,12 @@
     subtitle: '学习笔记',
     description: '机器人工程大学生的学习笔记与技术记录。',
     avatar: '/image/11.jpg',
-    walineServer: '', // TODO: 部署 Waline 后填入你的 Vercel 地址，如 https://your-waline.vercel.app
+    giscus: {
+      repo: 'chung-manhin/chung-manhin.github.io',
+      repoId: 'R_kgDOPNngSw',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOPNngS84C2NM0',
+    }
   };
 
   let postsData = [];
@@ -185,7 +190,7 @@
           ${postNav}
           <section class="comments-section" id="comments-section">
             <h3>\u8BC4\u8BBA</h3>
-            <div id="waline-container"></div>
+            <div id="giscus-container"></div>
           </section>
         </div>`;
 
@@ -212,7 +217,7 @@
         img.addEventListener('click', () => openLightbox(img.src));
       });
 
-      loadComments();
+      loadGiscus(post.slug);
     } catch (e) {
       contentEl().innerHTML = `<div class="view-container"><div class="article-header"><h1 class="article-title">\u52A0\u8F7D\u5931\u8D25</h1><p>${e.message}</p></div></div>`;
     }
@@ -393,20 +398,28 @@
     }, 30);
   }
 
-  /* ── Waline Comments ── */
-  function loadComments() {
-    const container = document.getElementById('waline-container');
-    if (!container || !SITE.walineServer) return;
-    const dark = document.body.classList.contains('dark-theme');
-    Waline.init({
-      el: '#waline-container',
-      serverURL: SITE.walineServer,
-      dark: dark,
-      lang: 'zh-CN',
-      emoji: ['https://unpkg.com/@waline/emojis@1.2.0/tw-emoji'],
-      pageSize: 10,
-      locale: { placeholder: '留下你的评论吧~（支持 Markdown）' },
-    });
+  /* ── Giscus ── */
+  function loadGiscus(slug) {
+    const container = document.getElementById('giscus-container');
+    if (!container || !SITE.giscus.repoId) return;
+    const theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', SITE.giscus.repo);
+    script.setAttribute('data-repo-id', SITE.giscus.repoId);
+    script.setAttribute('data-category', SITE.giscus.category);
+    script.setAttribute('data-category-id', SITE.giscus.categoryId);
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', slug);
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'top');
+    script.setAttribute('data-theme', theme);
+    script.setAttribute('data-lang', 'zh-CN');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+    container.appendChild(script);
   }
 
   window.BlogApp = { postsData: () => postsData, reloadPosts: loadPosts, SITE };
