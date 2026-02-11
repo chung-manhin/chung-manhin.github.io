@@ -303,7 +303,6 @@
 
   /* ── Scroll Reveal ── */
   let observer;
-  const isTouchDevice = window.matchMedia('(hover: none)').matches;
 
   function initScrollReveal() {
     if (!('IntersectionObserver' in window)) return;
@@ -311,9 +310,7 @@
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('revealed');
-          // On touch devices, keep observing so cards animate on re-enter
-          if (!isTouchDevice) observer.unobserve(entry.target);
-        } else if (isTouchDevice) {
+        } else {
           entry.target.classList.remove('revealed');
         }
       });
