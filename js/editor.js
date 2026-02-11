@@ -4,8 +4,8 @@
 (function () {
   'use strict';
 
-  const OWNER = 'chung-manhin';
-  const REPO = 'chung-manhin.github.io';
+  const OWNER = 'WenxuanZhong';
+  const REPO = 'WenxuanZhong.github.io';
   const BRANCH = 'master';
 
   let currentView = 'edit'; // 'edit' | 'preview'

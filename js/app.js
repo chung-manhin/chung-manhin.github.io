@@ -6,14 +6,14 @@
   'use strict';
 
   const SITE = {
-    title: "chung-manhin's blog",
-    author: 'chung-manhin',
+    title: "WZ's Log",
+    author: 'WenxuanZhong',
     nickname: 'wenxuan',
     subtitle: '学习笔记',
     description: '机器人工程大学生的学习笔记与技术记录。',
     avatar: '/image/11.jpg',
     giscus: {
-      repo: 'chung-manhin/chung-manhin.github.io',
+      repo: 'WenxuanZhong/WenxuanZhong.github.io',
       repoId: 'R_kgDOPNngSw',
       category: 'Announcements',
       categoryId: 'DIC_kwDOPNngS84C2NM0',
@@ -327,7 +327,7 @@
 
             <h2>\u8054\u7CFB</h2>
             <p>
-              <a href="https://github.com/chung-manhin" target="_blank" rel="noopener">GitHub</a>
+              <a href="https://github.com/WenxuanZhong" target="_blank" rel="noopener">GitHub</a>
               <span style="margin: 0 0.5rem; opacity: 0.3">|</span>
               \u6587\u7AE0\u4E0B\u65B9\u7559\u8A00\u4EA4\u6D41
             </p>
