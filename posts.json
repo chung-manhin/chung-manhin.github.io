@@ -6,5 +6,77 @@
     "category": "技术",
     "tags": ["Hexo", "博客", "学习记录"],
     "excerpt": "成功用 Hexo + GitHub 搭建了个人博客，学会了用 Markdown 写文章。记录部署过程中踩过的坑：404 生效延迟、Git 环境变量、用户身份配置等。"
+  },
+  {
+    "slug": "2025-08-02-ROS2入门笔记",
+    "title": "ROS2 入门笔记：从安装到第一个节点",
+    "date": "2025-08-02",
+    "category": "机器人",
+    "tags": ["ROS2", "机器人", "Linux"],
+    "excerpt": "记录 ROS2 Humble 的安装过程，理解节点、话题、服务的基本概念，并用 Python 写了第一个 publisher/subscriber 节点。"
+  },
+  {
+    "slug": "2025-08-18-STM32串口通信",
+    "title": "STM32 串口通信实战：从零到数据收发",
+    "date": "2025-08-18",
+    "category": "嵌入式",
+    "tags": ["STM32", "嵌入式", "UART"],
+    "excerpt": "使用 HAL 库实现 STM32 的 UART 串口通信，涵盖轮询、中断和 DMA 三种模式的对比和代码实现。"
+  },
+  {
+    "slug": "2025-09-05-CSS动画原理",
+    "title": "CSS 动画原理：从 transition 到 @keyframes",
+    "date": "2025-09-05",
+    "category": "前端",
+    "tags": ["CSS", "动画", "前端"],
+    "excerpt": "深入理解 CSS 动画的两大核心：transition 和 animation。涵盖贝塞尔曲线、GPU 加速、性能优化等实践技巧。"
+  },
+  {
+    "slug": "2025-09-20-Python数据可视化",
+    "title": "Python 数据可视化：Matplotlib 与 Seaborn 实战",
+    "date": "2025-09-20",
+    "category": "技术",
+    "tags": ["Python", "数据可视化", "学习记录"],
+    "excerpt": "总结使用 Matplotlib 和 Seaborn 进行数据可视化的常用方法，包括折线图、散点图、热力图的绘制与美化技巧。"
+  },
+  {
+    "slug": "2025-10-10-机器人运动学基础",
+    "title": "机器人运动学基础：DH 参数与正逆运动学",
+    "date": "2025-10-10",
+    "category": "机器人",
+    "tags": ["机器人", "运动学", "数学"],
+    "excerpt": "理解机器人运动学的核心概念：坐标变换、DH 参数法、正运动学求解，以及逆运动学的数值解法入门。"
+  },
+  {
+    "slug": "2025-11-01-Git进阶操作",
+    "title": "Git 进阶：rebase、cherry-pick 与工作流实践",
+    "date": "2025-11-01",
+    "category": "技术",
+    "tags": ["Git", "版本控制", "学习记录"],
+    "excerpt": "从 merge 到 rebase，从 stash 到 cherry-pick，记录日常开发中高频使用的 Git 进阶操作和团队协作工作流。"
+  },
+  {
+    "slug": "2025-11-15-PID控制入门",
+    "title": "PID 控制入门：从理论到电机调速实战",
+    "date": "2025-11-15",
+    "category": "嵌入式",
+    "tags": ["PID", "控制理论", "嵌入式"],
+    "excerpt": "理解 PID 控制器的三个参数含义，在 STM32 上实现直流电机的速度闭环控制，记录调参过程和经验。"
+  },
+  {
+    "slug": "2025-12-03-JavaScript异步编程",
+    "title": "JavaScript 异步编程：Promise、async/await 深度解析",
+    "date": "2025-12-03",
+    "category": "前端",
+    "tags": ["JavaScript", "异步", "前端"],
+    "excerpt": "从回调地狱到 Promise 链，再到 async/await 语法糖，全面梳理 JavaScript 异步编程模式和错误处理最佳实践。"
+  },
+  {
+    "slug": "2025-12-20-SLAM入门概述",
+    "title": "SLAM 入门概述：从原理到开源方案选型",
+    "date": "2025-12-20",
+    "category": "机器人",
+    "tags": ["SLAM", "机器人", "计算机视觉"],
+    "excerpt": "梳理 SLAM 的基本原理、前端后端架构、主流开源方案（ORB-SLAM3、Cartographer、LIO-SAM）的对比和适用场景。"
   }
 ]

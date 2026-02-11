@@ -1,16 +1,15 @@
 /**
- * app.js — SPA core: router, rendering, dark mode, animations, comments, stats
- * Newspaper / Editorial Poster theme
+ * app.js — SPA core: router, rendering, dark mode, animations, comments
+ * Clean modern blog theme
  */
 (function () {
   'use strict';
 
-  /* ── Config ── */
   const SITE = {
     title: "chung-manhin's blog",
     author: 'chung-manhin',
     nickname: 'wenxuan',
-    subtitle: 'Learn!',
+    subtitle: '学习笔记',
     description: '机器人工程大学生的学习笔记与技术记录。',
     avatar: '/image/11.jpg',
     giscus: {
@@ -24,16 +23,16 @@
   let postsData = [];
   const contentEl = () => document.getElementById('app-content');
 
-  /* ── Bootstrap ── */
   document.addEventListener('DOMContentLoaded', async () => {
     initThemeToggle();
+    initStickyHeader();
+    initReadingProgress();
     await loadPosts();
+    initScrollReveal();
     window.addEventListener('hashchange', onRoute);
     onRoute();
-    initScrollReveal();
   });
 
-  /* ── Load posts.json ── */
   async function loadPosts() {
     try {
       const res = await fetch('/posts.json?' + Date.now());
@@ -46,22 +45,41 @@
     if (window.BlogSearch) window.BlogSearch.init(postsData);
   }
 
-  /* ── Helpers ── */
-  function formatDateCN(dateStr) {
+  function formatDate(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
-    const year = d.getFullYear();
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    return year + '\u5E74' + month + '\u6708' + day + '\u65E5';
+    return d.getFullYear() + '\u5E74' + (d.getMonth() + 1) + '\u6708' + d.getDate() + '\u65E5';
   }
 
-  function getTodayEdition() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const days = ['\u661F\u671F\u65E5', '\u661F\u671F\u4E00', '\u661F\u671F\u4E8C', '\u661F\u671F\u4E09', '\u661F\u671F\u56DB', '\u661F\u671F\u4E94', '\u661F\u671F\u516D'];
-    return y + '-' + m + '-' + d + ' ' + days[now.getDay()];
+  /* ── Sticky Header (simple — no resize, just blur) ── */
+  function initStickyHeader() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        header.classList.toggle('scrolled', window.scrollY > 10);
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  /* ── Reading Progress ── */
+  function initReadingProgress() {
+    const bar = document.getElementById('reading-progress');
+    if (!bar) return;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = h > 0 ? Math.min(window.scrollY / h * 100, 100) + '%' : '0%';
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener('hashchange', () => { bar.style.width = '0%'; });
   }
 
   /* ── Router ── */
@@ -70,105 +88,54 @@
     const parts = hash.replace('#/', '').split('/');
     const route = parts[0] || '';
 
-    // Update active nav links
-    document.querySelectorAll('.masthead-nav a, .mobile-tab-bar a').forEach(a => {
+    document.querySelectorAll('.header-nav a, .mobile-tab-bar a').forEach(a => {
       const href = a.getAttribute('href') || '';
       a.classList.toggle('active', href === hash || (hash === '#/' && href === '#/'));
     });
 
     switch (route) {
-      case '':
-        renderHome();
-        break;
-      case 'post':
-        renderPost(decodeURIComponent(parts.slice(1).join('/')));
-        break;
-      case 'archives':
-        renderArchives();
-        break;
-      case 'tags':
-        renderTags();
-        break;
-      case 'about':
-        renderAbout();
-        break;
-      case 'editor':
-        renderEditor();
-        break;
-      default:
-        renderHome();
+      case '': renderHome(); break;
+      case 'post': renderPost(decodeURIComponent(parts.slice(1).join('/'))); break;
+      case 'archives': renderArchives(); break;
+      case 'tags': renderTags(); break;
+      case 'about': renderAbout(); break;
+      case 'editor': renderEditor(); break;
+      default: renderHome();
     }
-
     window.scrollTo(0, 0);
   }
 
-  /* ── Home — Newspaper Layout ── */
+  /* ── Home — Clean Post List ── */
   function renderHome() {
     document.title = SITE.title;
 
     if (postsData.length === 0) {
-      contentEl().innerHTML = `
-        <div class="view-container">
-          <div class="newspaper">
-            <div class="edition-bar">
-              <span class="edition-line"></span>
-              <span>${getTodayEdition()}</span>
-              <span class="edition-line"></span>
-            </div>
-            <div class="newspaper-empty">\u6682\u65E0\u6587\u7AE0</div>
-          </div>
-        </div>`;
+      contentEl().innerHTML = '<div class="view-container"><div class="post-list"><div class="post-list-empty">\u6682\u65E0\u6587\u7AE0</div></div></div>';
       return;
     }
 
-    // Lead story = first (newest) post
-    const lead = postsData[0];
-    const leadTags = lead.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-    let leadHTML = `
-      <article class="lead-story scroll-reveal">
-        <a href="#/post/${encodeURIComponent(lead.slug)}">
-          <div class="lead-category">${lead.category}</div>
-          <h2 class="lead-title">${lead.title}</h2>
-          <p class="lead-excerpt">${lead.excerpt}</p>
-          <div class="lead-meta">${formatDateCN(lead.date)} &middot; ${SITE.author}</div>
-          <div class="lead-tags">${leadTags}</div>
-        </a>
-      </article>`;
-
-    // Remaining stories in grid
-    let gridHTML = '';
-    if (postsData.length > 1) {
-      const rest = postsData.slice(1);
-      let items = '';
-      rest.forEach((post, i) => {
-        const isLastOdd = (rest.length % 2 === 1) && (i === rest.length - 1);
-        items += `
-          <article class="story scroll-reveal${isLastOdd ? ' full-width' : ''}">
-            <a href="#/post/${encodeURIComponent(post.slug)}">
-              <div class="story-category">${post.category}</div>
-              <h3 class="story-title">${post.title}</h3>
-              <p class="story-excerpt">${post.excerpt}</p>
-              <div class="story-meta">${post.date}</div>
-            </a>
-          </article>`;
-      });
-      gridHTML = `
-        <hr class="section-rule thick">
-        <div class="section-header">\u66F4\u591A\u6587\u7AE0</div>
-        <div class="stories-grid">${items}</div>`;
-    }
+    let cards = '';
+    postsData.forEach((post, i) => {
+      const tags = post.tags.map(t => `<span class="tag">${t}</span>`).join('');
+      cards += `
+        <article class="post-card${i === 0 ? ' featured' : ''} scroll-reveal">
+          <a href="#/post/${encodeURIComponent(post.slug)}">
+            <div class="post-card-meta">
+              <span class="post-card-category">${post.category}</span>
+              <span>${formatDate(post.date)}</span>
+            </div>
+            <h2 class="post-card-title">${post.title}</h2>
+            <p class="post-card-excerpt">${post.excerpt}</p>
+            <div class="post-card-tags">${tags}</div>
+          </a>
+        </article>`;
+    });
 
     contentEl().innerHTML = `
       <div class="view-container">
-        <div class="newspaper">
-          <div class="edition-bar">
-            <span class="edition-line"></span>
-            <span>${getTodayEdition()} &middot; \u7B2C ${postsData.length} \u7BC7</span>
-            <span class="edition-line"></span>
-          </div>
-          ${leadHTML}
-          ${gridHTML}
+        <div class="post-list">
+          <div class="post-list-header">Posts</div>
+          ${cards}
         </div>
       </div>`;
     reobserve();
@@ -182,7 +149,6 @@
       return;
     }
     document.title = `${post.title} | ${SITE.title}`;
-
     contentEl().innerHTML = '<div class="loading-spinner"></div>';
 
     try {
@@ -190,26 +156,23 @@
       if (!res.ok) throw new Error('Failed to load');
       const md = await res.text();
       const html = marked.parse(md);
-
       const tags = post.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
       contentEl().innerHTML = `
         <div class="view-container">
-          <div class="article-back"><a href="#/">&larr; \u8FD4\u56DE\u9996\u9875</a></div>
+          <div class="article-back"><a href="#/">&larr; \u8FD4\u56DE</a></div>
           <header class="article-header">
             <div class="article-category">${post.category}</div>
             <h1 class="article-title">${post.title}</h1>
             <div class="article-meta">
-              <span>${formatDateCN(post.date)}</span>
+              <span>${formatDate(post.date)}</span>
               <span>${SITE.author}</span>
             </div>
             <div class="article-tags">${tags}</div>
           </header>
-          <div class="article-divider">
-            <span class="article-divider-ornament">\u25C6</span>
-          </div>
           <article class="article-body">${html}</article>
           <div class="article-reading-count">
-            <span id="busuanzi_container_page_pv">\u9605\u8BFB\u91CF: <span id="busuanzi_value_page_pv">--</span></span>
+            <span id="busuanzi_container_page_pv">\u9605\u8BFB <span id="busuanzi_value_page_pv">--</span></span>
           </div>
           <section class="comments-section" id="comments-section">
             <h3>\u8BC4\u8BBA</h3>
@@ -217,14 +180,10 @@
           </section>
         </div>`;
 
-      // Syntax highlighting
       document.querySelectorAll('.article-body pre code').forEach(block => {
         hljs.highlightElement(block);
       });
-
-      // Load Giscus comments
       loadGiscus(post.slug);
-
     } catch (e) {
       contentEl().innerHTML = `<div class="view-container"><div class="article-header"><h1 class="article-title">\u52A0\u8F7D\u5931\u8D25</h1><p>${e.message}</p></div></div>`;
     }
@@ -239,15 +198,11 @@
       (byYear[y] = byYear[y] || []).push(p);
     });
 
-    let html = '<div class="view-container"><div class="archive-page"><h1>\u5F52\u6863</h1><hr class="page-title-rule">';
+    let html = '<div class="view-container"><div class="archive-page"><h1>\u5F52\u6863</h1>';
     Object.keys(byYear).sort((a, b) => b - a).forEach(year => {
       html += `<h2 class="archive-year">${year}</h2><ul class="archive-list">`;
       byYear[year].forEach(p => {
-        html += `
-          <li class="archive-item scroll-reveal">
-            <span class="archive-item-date">${p.date}</span>
-            <a class="archive-item-title" href="#/post/${encodeURIComponent(p.slug)}">${p.title}</a>
-          </li>`;
+        html += `<li class="archive-item scroll-reveal"><span class="archive-item-date">${p.date}</span><a class="archive-item-title" href="#/post/${encodeURIComponent(p.slug)}">${p.title}</a></li>`;
       });
       html += '</ul>';
     });
@@ -260,31 +215,22 @@
   function renderTags() {
     document.title = `\u6807\u7B7E | ${SITE.title}`;
     const tagMap = {};
-    postsData.forEach(p => {
-      p.tags.forEach(t => {
-        (tagMap[t] = tagMap[t] || []).push(p);
-      });
-    });
+    postsData.forEach(p => { p.tags.forEach(t => { (tagMap[t] = tagMap[t] || []).push(p); }); });
 
     const tagNames = Object.keys(tagMap).sort();
     let chips = '<div class="tags-cloud">';
-    tagNames.forEach(t => {
-      chips += `<span class="tag-chip" data-tag="${t}">${t}<span class="tag-count">(${tagMap[t].length})</span></span>`;
-    });
+    tagNames.forEach(t => { chips += `<span class="tag-chip" data-tag="${t}">${t}<span class="tag-count">(${tagMap[t].length})</span></span>`; });
     chips += '</div>';
 
     let lists = '';
     tagNames.forEach(t => {
       lists += `<div class="tag-posts" data-tag="${t}"><h2 class="archive-year">${t}</h2><ul class="archive-list">`;
-      tagMap[t].forEach(p => {
-        lists += `<li class="archive-item"><span class="archive-item-date">${p.date}</span><a class="archive-item-title" href="#/post/${encodeURIComponent(p.slug)}">${p.title}</a></li>`;
-      });
+      tagMap[t].forEach(p => { lists += `<li class="archive-item"><span class="archive-item-date">${p.date}</span><a class="archive-item-title" href="#/post/${encodeURIComponent(p.slug)}">${p.title}</a></li>`; });
       lists += '</ul></div>';
     });
 
-    contentEl().innerHTML = `<div class="view-container"><div class="tags-page"><h1>\u6807\u7B7E</h1><hr class="page-title-rule">${chips}${lists}</div></div>`;
+    contentEl().innerHTML = `<div class="view-container"><div class="tags-page"><h1>\u6807\u7B7E</h1>${chips}${lists}</div></div>`;
 
-    // Tag chip click filter
     document.querySelectorAll('.tag-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const tag = chip.dataset.tag;
@@ -293,9 +239,7 @@
         document.querySelectorAll('.tag-posts').forEach(el => el.style.display = '');
         if (!isActive) {
           chip.classList.add('active');
-          document.querySelectorAll('.tag-posts').forEach(el => {
-            el.style.display = el.dataset.tag === tag ? '' : 'none';
-          });
+          document.querySelectorAll('.tag-posts').forEach(el => { el.style.display = el.dataset.tag === tag ? '' : 'none'; });
         }
       });
     });
@@ -307,8 +251,7 @@
     contentEl().innerHTML = `
       <div class="view-container">
         <div class="about-page">
-          <h1>\u5173\u4E8E\u6211</h1>
-          <hr class="page-title-rule">
+          <h1>\u5173\u4E8E</h1>
           <div class="about-content">
             <p>\u4F60\u597D\uFF01\u6211\u662F <strong>${SITE.nickname}</strong>\uFF0C\u4E00\u540D\u673A\u5668\u4EBA\u5DE5\u7A0B\u5927\u5B66\u751F\u3002</p>
             <p>\u8FD9\u4E2A\u535A\u5BA2\u7528\u6765\u8BB0\u5F55\u6211\u7684\u5B66\u4E60\u7B14\u8BB0\u3001\u6280\u672F\u63A2\u7D22\u548C\u9879\u76EE\u7ECF\u5386\u3002\u5E0C\u671B\u8FD9\u4E9B\u5185\u5BB9\u5BF9\u4F60\u4E5F\u6709\u6240\u5E2E\u52A9\u3002</p>
@@ -319,26 +262,27 @@
       </div>`;
   }
 
-  /* ── Editor (delegates to editor.js) ── */
+  /* ── Editor ── */
   function renderEditor() {
     document.title = `\u7F16\u8F91\u5668 | ${SITE.title}`;
-    if (window.BlogEditor) {
-      window.BlogEditor.render(contentEl());
-    } else {
-      contentEl().innerHTML = '<div class="view-container"><p style="padding:3rem;text-align:center">\u7F16\u8F91\u5668\u6A21\u5757\u52A0\u8F7D\u4E2D\u2026</p></div>';
-    }
+    if (window.BlogEditor) { window.BlogEditor.render(contentEl()); }
+    else { contentEl().innerHTML = '<div class="view-container"><p style="padding:3rem;text-align:center">\u7F16\u8F91\u5668\u6A21\u5757\u52A0\u8F7D\u4E2D\u2026</p></div>'; }
   }
 
   /* ── Dark Mode ── */
   function initThemeToggle() {
     const btn = document.getElementById('theme-toggle');
     const icon = document.getElementById('theme-icon');
+    const mobileBtn = document.getElementById('mobile-theme-toggle');
+    const mobileIcon = document.getElementById('mobile-theme-icon');
     if (!btn) return;
 
     function applyTheme(dark) {
       document.body.classList.toggle('dark-theme', dark);
       document.documentElement.classList.toggle('dark-theme', dark);
-      icon.textContent = dark ? '\u2609' : '\u263E';
+      const sym = dark ? '\u2609' : '\u263E';
+      icon.textContent = sym;
+      if (mobileIcon) mobileIcon.textContent = sym;
       localStorage.setItem('theme', dark ? 'dark' : 'light');
     }
 
@@ -349,9 +293,15 @@
     btn.addEventListener('click', () => {
       applyTheme(!document.body.classList.contains('dark-theme'));
     });
+
+    if (mobileBtn) {
+      mobileBtn.addEventListener('click', () => {
+        applyTheme(!document.body.classList.contains('dark-theme'));
+      });
+    }
   }
 
-  /* ── Scroll Reveal (IntersectionObserver) ── */
+  /* ── Scroll Reveal ── */
   let observer;
   function initScrollReveal() {
     if (!('IntersectionObserver' in window)) return;
@@ -362,23 +312,20 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
   }
 
   function reobserve() {
     if (!observer) return;
     setTimeout(() => {
-      document.querySelectorAll('.scroll-reveal:not(.revealed)').forEach(el => {
-        observer.observe(el);
-      });
-    }, 50);
+      document.querySelectorAll('.scroll-reveal:not(.revealed)').forEach(el => observer.observe(el));
+    }, 30);
   }
 
-  /* ── Giscus Comments ── */
+  /* ── Giscus ── */
   function loadGiscus(slug) {
     const container = document.getElementById('giscus-container');
     if (!container || !SITE.giscus.repoId) return;
-
     const theme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
     const script = document.createElement('script');
     script.src = 'https://giscus.app/client.js';
@@ -399,11 +346,5 @@
     container.appendChild(script);
   }
 
-  /* ── Expose for other modules ── */
-  window.BlogApp = {
-    postsData: () => postsData,
-    reloadPosts: loadPosts,
-    SITE
-  };
-
+  window.BlogApp = { postsData: () => postsData, reloadPosts: loadPosts, SITE };
 })();
