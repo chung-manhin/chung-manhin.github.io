@@ -345,19 +345,23 @@
             btn.classList.add('active');
 
             if (currentView === 'edit') {
-              editorPane.style.display = 'block';
+              editorPane.style.display = '';
               previewPane.style.display = 'none';
-              editorPane.style.width = '100%';
+              editorPane.style.width = '';
+              editorPane.style.flex = '1';
             } else if (currentView === 'preview') {
               editorPane.style.display = 'none';
-              previewPane.style.display = 'block';
-              previewPane.style.width = '100%';
+              previewPane.style.display = '';
+              previewPane.style.width = '';
+              previewPane.style.flex = '1';
               updatePreview();
             } else if (currentView === 'split') {
-              editorPane.style.display = 'block';
-              previewPane.style.display = 'block';
+              editorPane.style.display = '';
+              previewPane.style.display = '';
               editorPane.style.width = '50%';
               previewPane.style.width = '50%';
+              editorPane.style.flex = '';
+              previewPane.style.flex = '';
               updatePreview();
             }
           });
