@@ -29,9 +29,102 @@
   }
 
   const BlogEditor = {
-    currentMode: 'list', // 'list' | 'edit' | 'new'
+    currentMode: 'list', // 'list' | 'edit' | 'new' | 'images' | 'templates'
     currentPost: null,
     allPosts: [],
+    allImages: [],
+    templates: [
+      {
+        name: '技术文章',
+        content: `# 标题
+
+## 简介
+
+简要介绍文章主题和目标。
+
+## 背景
+
+为什么需要这个技术/方案？
+
+## 实现
+
+### 步骤 1
+
+详细说明...
+
+### 步骤 2
+
+详细说明...
+
+## 总结
+
+总结要点和收获。
+
+## 参考资料
+
+- [链接1](url)
+- [链接2](url)`
+      },
+      {
+        name: '学习笔记',
+        content: `# 学习笔记：主题
+
+## 学习目标
+
+- 目标1
+- 目标2
+
+## 核心概念
+
+### 概念1
+
+解释...
+
+### 概念2
+
+解释...
+
+## 实践练习
+
+代码示例或练习...
+
+## 总结
+
+今天学到了什么...`
+      },
+      {
+        name: '问题解决',
+        content: `# 问题：简短描述
+
+## 问题描述
+
+详细描述遇到的问题...
+
+## 环境信息
+
+- 操作系统：
+- 版本：
+- 相关工具：
+
+## 解决方案
+
+### 尝试1
+
+结果...
+
+### 最终方案
+
+详细步骤...
+
+## 原因分析
+
+为什么会出现这个问题...
+
+## 总结
+
+经验教训...`
+      }
+    ],
 
     async render(container) {
       const token = localStorage.getItem('gh_token');
@@ -45,6 +138,10 @@
         await this._renderPostList(container);
       } else if (this.currentMode === 'edit' || this.currentMode === 'new') {
         this._renderEditor(container);
+      } else if (this.currentMode === 'images') {
+        await this._renderImageManager(container);
+      } else if (this.currentMode === 'templates') {
+        this._renderTemplates(container);
       }
     },
 
@@ -79,6 +176,8 @@
             <div class="editor-top-bar">
               <h2 style="margin: 0; font-size: 1.2rem;">博客管理</h2>
               <div class="editor-actions">
+                <button class="btn btn-secondary" id="editor-images">🖼️ 图片</button>
+                <button class="btn btn-secondary" id="editor-templates">📋 模板</button>
                 <button class="btn btn-secondary" id="editor-logout">退出</button>
                 <button class="btn btn-primary" id="editor-new-post">✏️ 写新文章</button>
               </div>
@@ -91,6 +190,7 @@
                 <option value="title-asc">标题 A-Z</option>
                 <option value="title-desc">标题 Z-A</option>
               </select>
+              <button class="btn btn-secondary" id="batch-delete-btn" style="display:none;">🗑️ 批量删除</button>
             </div>
             <div id="posts-list-container" class="posts-list">
               <div class="loading-spinner"></div>
@@ -101,6 +201,16 @@
 
       document.getElementById('editor-logout').addEventListener('click', () => {
         localStorage.removeItem('gh_token');
+        this.render(container);
+      });
+
+      document.getElementById('editor-images').addEventListener('click', () => {
+        this.currentMode = 'images';
+        this.render(container);
+      });
+
+      document.getElementById('editor-templates').addEventListener('click', () => {
+        this.currentMode = 'templates';
         this.render(container);
       });
 
@@ -118,6 +228,57 @@
       // 排序功能
       document.getElementById('posts-sort').addEventListener('change', (e) => {
         this._filterAndRenderPosts(document.getElementById('posts-search').value, e.target.value);
+      });
+
+      // 批量删除功能
+      document.getElementById('batch-delete-btn').addEventListener('click', async () => {
+        const checkboxes = document.querySelectorAll('.post-checkbox:checked');
+        if (checkboxes.length === 0) return;
+
+        if (!confirm(`确定要删除选中的 ${checkboxes.length} 篇文章吗？`)) return;
+
+        this._setStatus('loading', '批量删除中...');
+
+        try {
+          const token = localStorage.getItem('gh_token');
+
+          for (const checkbox of checkboxes) {
+            const idx = parseInt(checkbox.dataset.idx);
+            const post = this.allPosts[idx];
+
+            // 删除 markdown 文件
+            const mdRes = await this._githubGet(`posts/${post.slug}.md`, token);
+            if (mdRes) {
+              await this._githubDelete(`posts/${post.slug}.md`, mdRes.sha, `Delete post: ${post.title}`, token);
+            }
+          }
+
+          // 重新加载并更新 posts.json
+          const postsJsonRes = await this._githubGet('posts.json', token);
+          let latestPosts = [];
+          if (postsJsonRes) {
+            const postsContent = base64DecodeUnicode(postsJsonRes.content.replace(/\n/g, ''));
+            latestPosts = JSON.parse(postsContent);
+          }
+
+          // 移除已删除的文章
+          const deletedSlugs = Array.from(checkboxes).map(cb => this.allPosts[parseInt(cb.dataset.idx)].slug);
+          latestPosts = latestPosts.filter(p => !deletedSlugs.includes(p.slug));
+
+          // 保存 posts.json
+          const postsJsonSha = postsJsonRes ? postsJsonRes.sha : undefined;
+          const postsContent = JSON.stringify(latestPosts, null, 2);
+          await this._githubPut('posts.json', postsContent, 'Batch delete posts', token, postsJsonSha);
+
+          this.allPosts = latestPosts;
+          this._setStatus('success', `成功删除 ${checkboxes.length} 篇文章！`);
+
+          setTimeout(() => {
+            this._filterAndRenderPosts('', 'date-desc');
+          }, 1000);
+        } catch (err) {
+          this._setStatus('error', '批量删除失败: ' + err.message);
+        }
       });
 
       try {
@@ -177,6 +338,7 @@
         <table class="posts-table">
           <thead>
             <tr>
+              <th><input type="checkbox" id="select-all-posts"></th>
               <th>标题</th>
               <th>日期</th>
               <th>分类</th>
@@ -188,6 +350,7 @@
               const idx = this.allPosts.findIndex(p => p.slug === post.slug);
               return `
               <tr>
+                <td><input type="checkbox" class="post-checkbox" data-idx="${idx}"></td>
                 <td class="post-title">${this._escapeHtml(post.title)}</td>
                 <td>${post.date}</td>
                 <td>${this._escapeHtml(post.category)}</td>
@@ -202,6 +365,24 @@
         </table>`;
 
       container.innerHTML = html;
+
+      // 全选功能
+      const selectAll = document.getElementById('select-all-posts');
+      const checkboxes = document.querySelectorAll('.post-checkbox');
+      const batchDeleteBtn = document.getElementById('batch-delete-btn');
+
+      selectAll.addEventListener('change', () => {
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        batchDeleteBtn.style.display = selectAll.checked ? 'block' : 'none';
+      });
+
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const checkedCount = document.querySelectorAll('.post-checkbox:checked').length;
+          batchDeleteBtn.style.display = checkedCount > 0 ? 'block' : 'none';
+          selectAll.checked = checkedCount === checkboxes.length;
+        });
+      });
 
       // 绑定预览按钮
       container.querySelectorAll('.btn-preview').forEach(btn => {
@@ -812,6 +993,148 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    },
+
+    // 图片管理器
+    async _renderImageManager(container) {
+      const token = localStorage.getItem('gh_token');
+
+      container.innerHTML = `
+        <div class="view-container">
+          <div class="editor-page">
+            <div class="editor-top-bar">
+              <h2 style="margin: 0; font-size: 1.2rem;">🖼️ 图片管理</h2>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" id="images-back">返回</button>
+              </div>
+            </div>
+            <div id="images-container" class="images-grid">
+              <div class="loading-spinner"></div>
+            </div>
+            <div id="editor-status" class="editor-status"></div>
+          </div>
+        </div>`;
+
+      document.getElementById('images-back').addEventListener('click', () => {
+        this.currentMode = 'list';
+        this.render(container);
+      });
+
+      try {
+        this._setStatus('loading', '加载图片列表...');
+        await this._loadImages(token);
+        this._renderImagesGrid();
+      } catch (err) {
+        this._setStatus('error', '加载失败: ' + err.message);
+      }
+    },
+
+    async _loadImages(token) {
+      const res = await this._githubGet('image', token);
+      if (res && Array.isArray(res)) {
+        this.allImages = res.filter(item => item.type === 'file' && /\.(jpg|jpeg|png|gif|webp)$/i.test(item.name));
+      } else {
+        this.allImages = [];
+      }
+    },
+
+    _renderImagesGrid() {
+      const container = document.getElementById('images-container');
+
+      if (this.allImages.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">还没有上传图片</p>';
+        this._setStatus('', '');
+        return;
+      }
+
+      const html = this.allImages.map(img => `
+        <div class="image-card">
+          <img src="${img.download_url}" alt="${img.name}" loading="lazy">
+          <div class="image-info">
+            <span class="image-name" title="${img.name}">${img.name}</span>
+            <div class="image-actions">
+              <button class="btn-small" data-url="${img.download_url}">复制链接</button>
+              <button class="btn-small btn-delete" data-name="${img.name}" data-sha="${img.sha}">删除</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = html;
+      this._setStatus('success', `共 ${this.allImages.length} 张图片`);
+
+      // 绑定复制链接
+      container.querySelectorAll('.image-actions .btn-small:not(.btn-delete)').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const url = btn.dataset.url;
+          navigator.clipboard.writeText(`![](${url})`).then(() => {
+            this._setStatus('success', '已复制 Markdown 格式链接！');
+          });
+        });
+      });
+
+      // 绑定删除按钮
+      container.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('确定要删除这张图片吗？')) return;
+
+          const name = btn.dataset.name;
+          const sha = btn.dataset.sha;
+          const token = localStorage.getItem('gh_token');
+
+          try {
+            this._setStatus('loading', '删除中...');
+            await this._githubDelete(`image/${name}`, sha, `Delete image: ${name}`, token);
+            await this._loadImages(token);
+            this._renderImagesGrid();
+            this._setStatus('success', '删除成功！');
+          } catch (err) {
+            this._setStatus('error', '删除失败: ' + err.message);
+          }
+        });
+      });
+    },
+
+    // 模板选择器
+    _renderTemplates(container) {
+      container.innerHTML = `
+        <div class="view-container">
+          <div class="editor-page">
+            <div class="editor-top-bar">
+              <h2 style="margin: 0; font-size: 1.2rem;">📋 文章模板</h2>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" id="templates-back">返回</button>
+              </div>
+            </div>
+            <div class="templates-list">
+              ${this.templates.map((tpl, idx) => `
+                <div class="template-card">
+                  <h3>${tpl.name}</h3>
+                  <pre class="template-preview">${this._escapeHtml(tpl.content.substring(0, 200))}...</pre>
+                  <button class="btn btn-primary" data-idx="${idx}">使用此模板</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('templates-back').addEventListener('click', () => {
+        this.currentMode = 'list';
+        this.render(container);
+      });
+
+      // 绑定使用模板按钮
+      document.querySelectorAll('.template-card button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          const template = this.templates[idx];
+
+          // 创建新文章并使用模板
+          this.currentMode = 'new';
+          this.currentPost = { content: template.content };
+          this.render(document.getElementById('app-content'));
+        });
+      });
     }
   };
 

@@ -1251,6 +1251,22 @@ pre:hover .code-copy-btn { opacity: 1; }
   10%, 90% { opacity: 1; }
 }
 
+/* 图片管理器 */
+.images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; padding: 1rem; }
+.image-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform 0.2s; }
+.image-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.image-card img { width: 100%; height: 150px; object-fit: cover; }
+.image-info { padding: 0.75rem; }
+.image-name { display: block; font-size: 0.85rem; color: var(--text); margin-bottom: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.image-actions { display: flex; gap: 0.5rem; }
+
+/* 模板列表 */
+.templates-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 1.5rem; }
+.template-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+.template-card h3 { margin: 0 0 1rem; font-size: 1.1rem; color: var(--text); }
+.template-preview { background: var(--code-bg); padding: 1rem; border-radius: 6px; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary); overflow: hidden; margin-bottom: 1rem; max-height: 200px; }
+.template-card button { width: 100%; }
+
 .token-setup { max-width: 420px; margin: 3rem auto; padding: 2rem; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .token-setup h2 { font-family: var(--font-sans); color: var(--text); margin-bottom: 0.75rem; font-size: 1.2rem; }
 .token-setup p { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.88rem; line-height: 1.6; }
@@ -1336,6 +1352,10 @@ pre:hover .code-copy-btn { opacity: 1; }
 
   .posts-filter-bar { flex-direction: column; }
   .posts-search-input, .posts-sort-select { width: 100%; }
+  #batch-delete-btn { width: 100%; }
+
+  .images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; padding: 0.75rem; }
+  .templates-list { grid-template-columns: 1fr; padding: 1rem; }
 
   .word-count { left: 10px; bottom: 70px; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
   .draft-indicator { right: 10px; bottom: 70px; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
