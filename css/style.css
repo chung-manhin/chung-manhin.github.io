@@ -1230,8 +1230,8 @@ pre:hover .code-copy-btn { opacity: 1; }
 
 .editor-body { display: flex; gap: 0; height: 100%; overflow: hidden; }
 .editor-pane { flex: 1; display: flex; flex-direction: column; transition: all 0.3s; min-width: 0; }
-.preview-pane { flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--border); transition: all 0.3s; min-width: 0; }
-.preview-content { max-width: 720px; margin: 0 auto; min-height: 100%; }
+.preview-pane { flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--border); transition: all 0.3s; min-width: 0; display: flex; justify-content: center; }
+.preview-content { width: 100%; max-width: 720px; min-height: 100%; }
 .preview-content img { max-width: 100%; height: auto; border-radius: 8px; }
 
 .draft-indicator { position: fixed; bottom: 80px; right: 20px; background: rgba(34,197,94,0.9); color: #fff; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; z-index: 1000; animation: fadeInOut 2s; }
