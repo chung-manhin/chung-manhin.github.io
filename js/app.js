@@ -171,6 +171,28 @@
         : '<span class="post-nav-item"></span>';
       postNav += '</nav>';
 
+      // 相关文章推荐
+      const relatedPosts = postsData
+        .filter(p => p.slug !== post.slug && p.tags.some(t => post.tags.includes(t)))
+        .slice(0, 3);
+
+      let relatedHtml = '';
+      if (relatedPosts.length > 0) {
+        relatedHtml = `
+          <section class="related-posts">
+            <h3>相关文章</h3>
+            <div class="related-posts-grid">
+              ${relatedPosts.map(p => `
+                <a href="#/post/${encodeURIComponent(p.slug)}" class="related-post-card">
+                  <div class="related-post-category">${p.category}</div>
+                  <div class="related-post-title">${p.title}</div>
+                  <div class="related-post-excerpt">${p.excerpt}</div>
+                </a>
+              `).join('')}
+            </div>
+          </section>`;
+      }
+
       contentEl().innerHTML = `
         <div class="view-container">
           <div class="article-back"><a href="#/">&larr; \u8FD4\u56DE</a></div>
@@ -182,11 +204,26 @@
               <span>${SITE.author}</span>
             </div>
             <div class="article-tags">${tags}</div>
+            <div class="article-share">
+              <button class="share-btn" id="share-twitter" title="分享到 Twitter">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+              </button>
+              <button class="share-btn" id="share-weibo" title="分享到微博">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 14.5c-2.5 0-4.5 1.5-4.5 3.5s2 3.5 4.5 3.5 4.5-1.5 4.5-3.5-2-3.5-4.5-3.5zm0 5.5c-1.4 0-2.5-.9-2.5-2s1.1-2 2.5-2 2.5.9 2.5 2-1.1 2-2.5 2zm8-12c-3.3 0-6 2-6 4.5 0 1.5.8 2.8 2 3.7-.3.5-.5 1-.5 1.6 0 1.9 2 3.5 4.5 3.5s4.5-1.6 4.5-3.5c0-1.9-2-3.5-4.5-3.5-.5 0-1 .1-1.4.2-.5-.5-.8-1.2-.8-1.9 0-1.4 1.3-2.5 3-2.5 1.2 0 2.2.5 2.8 1.3l1.4-1.2C20.5 9 19.3 8 17.5 8z"/></svg>
+              </button>
+              <button class="share-btn" id="share-copy" title="复制链接">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </button>
+            </div>
           </header>
-          <article class="article-body">${html}</article>
+          <div class="article-container">
+            <aside class="article-toc" id="article-toc"></aside>
+            <article class="article-body" id="article-content">${html}</article>
+          </div>
           <div class="article-reading-count">
             <span id="busuanzi_container_page_pv">\u9605\u8BFB <span id="busuanzi_value_page_pv">--</span></span>
           </div>
+          ${relatedHtml}
           ${postNav}
           <section class="comments-section" id="comments-section">
             <h3>\u8BC4\u8BBA</h3>
@@ -210,6 +247,12 @@
         });
         pre.appendChild(btn);
       });
+
+      // 生成文章目录（TOC）
+      generateTOC();
+
+      // 分享功能
+      setupShareButtons(post);
 
       // Image lightbox
       document.querySelectorAll('.article-body img').forEach(img => {
@@ -420,6 +463,105 @@
     script.crossOrigin = 'anonymous';
     script.async = true;
     container.appendChild(script);
+  }
+
+  /* ── TOC 生成 ── */
+  function generateTOC() {
+    const article = document.getElementById('article-content');
+    const tocContainer = document.getElementById('article-toc');
+    if (!article || !tocContainer) return;
+
+    const headings = article.querySelectorAll('h2, h3');
+    if (headings.length < 3) {
+      tocContainer.style.display = 'none';
+      return;
+    }
+
+    let tocHTML = '<div class="toc-title">目录</div><nav class="toc-nav">';
+    headings.forEach((heading, index) => {
+      const id = `heading-${index}`;
+      heading.id = id;
+      const level = heading.tagName === 'H2' ? 'toc-h2' : 'toc-h3';
+      tocHTML += `<a href="#${id}" class="toc-link ${level}">${heading.textContent}</a>`;
+    });
+    tocHTML += '</nav>';
+
+    tocContainer.innerHTML = tocHTML;
+
+    // 平滑滚动
+    tocContainer.querySelectorAll('.toc-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // 更新 URL 但不触发滚动
+          history.pushState(null, null, `#${targetId}`);
+        }
+      });
+    });
+
+    // 高亮当前章节
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        let current = '';
+        headings.forEach(heading => {
+          const rect = heading.getBoundingClientRect();
+          if (rect.top < 100) {
+            current = heading.id;
+          }
+        });
+
+        tocContainer.querySelectorAll('.toc-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+          }
+        });
+
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  /* ── 分享功能 ── */
+  function setupShareButtons(post) {
+    const url = window.location.href;
+    const title = post.title;
+
+    // Twitter
+    const twitterBtn = document.getElementById('share-twitter');
+    if (twitterBtn) {
+      twitterBtn.addEventListener('click', () => {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+      });
+    }
+
+    // 微博
+    const weiboBtn = document.getElementById('share-weibo');
+    if (weiboBtn) {
+      weiboBtn.addEventListener('click', () => {
+        window.open(`https://service.weibo.com/share/share.php?title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+      });
+    }
+
+    // 复制链接
+    const copyBtn = document.getElementById('share-copy');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(url).then(() => {
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+          }, 1500);
+        });
+      });
+    }
   }
 
   window.BlogApp = { postsData: () => postsData, reloadPosts: loadPosts, SITE };
