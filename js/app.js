@@ -216,10 +216,7 @@
               </button>
             </div>
           </header>
-          <div class="article-container">
-            <aside class="article-toc" id="article-toc"></aside>
-            <article class="article-body" id="article-content">${html}</article>
-          </div>
+          <article class="article-body" id="article-content">${html}</article>
           <div class="article-reading-count">
             <span id="busuanzi_container_page_pv">\u9605\u8BFB <span id="busuanzi_value_page_pv">--</span></span>
           </div>
@@ -229,7 +226,17 @@
             <h3>\u8BC4\u8BBA</h3>
             <div id="giscus-container"></div>
           </section>
-        </div>`;
+        </div>
+
+        <!-- 浮动目录 -->
+        <button class="toc-toggle" id="toc-toggle" title="目录">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <aside class="article-toc-float" id="article-toc-float"></aside>`;
 
       // Code copy buttons
       document.querySelectorAll('.article-body pre code').forEach(block => {
@@ -468,16 +475,18 @@
   /* ── TOC 生成 ── */
   function generateTOC() {
     const article = document.getElementById('article-content');
-    const tocContainer = document.getElementById('article-toc');
-    if (!article || !tocContainer) return;
+    const tocContainer = document.getElementById('article-toc-float');
+    const tocToggle = document.getElementById('toc-toggle');
+
+    if (!article || !tocContainer || !tocToggle) return;
 
     const headings = article.querySelectorAll('h2, h3');
     if (headings.length < 3) {
-      tocContainer.style.display = 'none';
+      tocToggle.style.display = 'none';
       return;
     }
 
-    let tocHTML = '<div class="toc-title">目录</div><nav class="toc-nav">';
+    let tocHTML = '<div class="toc-header"><span class="toc-title">目录</span><button class="toc-close" id="toc-close">×</button></div><nav class="toc-nav">';
     headings.forEach((heading, index) => {
       const id = `heading-${index}`;
       heading.id = id;
@@ -488,6 +497,22 @@
 
     tocContainer.innerHTML = tocHTML;
 
+    // 切换显示/隐藏
+    tocToggle.addEventListener('click', () => {
+      tocContainer.classList.toggle('show');
+    });
+
+    document.getElementById('toc-close').addEventListener('click', () => {
+      tocContainer.classList.remove('show');
+    });
+
+    // 点击外部关闭
+    document.addEventListener('click', (e) => {
+      if (!tocContainer.contains(e.target) && !tocToggle.contains(e.target)) {
+        tocContainer.classList.remove('show');
+      }
+    });
+
     // 平滑滚动
     tocContainer.querySelectorAll('.toc-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -496,8 +521,8 @@
         const target = document.getElementById(targetId);
         if (target) {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // 更新 URL 但不触发滚动
           history.pushState(null, null, `#${targetId}`);
+          tocContainer.classList.remove('show');
         }
       });
     });
