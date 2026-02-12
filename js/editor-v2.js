@@ -236,6 +236,11 @@
       const isNew = this.currentMode === 'new';
       const post = this.currentPost || {};
 
+      // 尝试从 localStorage 恢复草稿
+      const draftKey = `draft_${post.slug || 'new'}`;
+      const draft = localStorage.getItem(draftKey);
+      const content = draft || post.content || '';
+
       container.innerHTML = `
         <div class="view-container">
           <div class="editor-page">
@@ -246,18 +251,29 @@
                 placeholder="分类" value="${this._escapeHtml(post.category || '技术')}">
               <input type="text" class="editor-tags-input" id="editor-tags"
                 placeholder="标签 (逗号分隔)" value="${(post.tags || []).join(', ')}">
+              <div class="editor-view-toggle" id="editor-view-toggle">
+                <button class="active" data-view="edit">编辑</button>
+                <button data-view="split">分屏</button>
+                <button data-view="preview">预览</button>
+              </div>
               <div class="editor-actions">
                 <button class="btn btn-secondary" id="editor-back">返回</button>
                 <button class="btn btn-primary" id="editor-save">💾 保存</button>
               </div>
             </div>
             <div class="editor-body">
-              <div class="editor-pane">
+              <div class="editor-pane" id="editor-pane">
                 <textarea class="editor-textarea" id="editor-content"
-                  placeholder="在这里写 Markdown 内容...">${this._escapeHtml(post.content || '')}</textarea>
+                  placeholder="在这里写 Markdown 内容...支持粘贴图片 (Ctrl+V) 和拖拽上传">${this._escapeHtml(content)}</textarea>
+              </div>
+              <div class="preview-pane" id="preview-pane" style="display:none;">
+                <div class="preview-content" id="preview-content"></div>
               </div>
             </div>
             <div id="editor-status" class="editor-status"></div>
+            <div class="draft-indicator" id="draft-indicator" style="display:none;">
+              <span>📝 草稿已自动保存</span>
+            </div>
           </div>
           <div class="editor-mobile-toolbar" id="editor-toolbar">
             <button data-insert="**" data-wrap="true">B</button>
@@ -277,14 +293,157 @@
 
     _bindEditorEvents() {
       const textarea = document.getElementById('editor-content');
+      const preview = document.getElementById('preview-content');
+      const editorPane = document.getElementById('editor-pane');
+      const previewPane = document.getElementById('preview-pane');
+      const draftIndicator = document.getElementById('draft-indicator');
+
+      let autoSaveTimer = null;
+      let currentView = 'edit';
+
+      // 草稿键
+      const post = this.currentPost || {};
+      const draftKey = `draft_${post.slug || 'new'}`;
+
+      // 实时预览
+      const updatePreview = () => {
+        if (currentView === 'edit') return;
+        const md = textarea.value;
+        preview.innerHTML = marked.parse(md);
+        preview.querySelectorAll('pre code').forEach(block => {
+          if (window.hljs) hljs.highlightElement(block);
+        });
+      };
+
+      // 自动保存草稿
+      const saveDraft = () => {
+        localStorage.setItem(draftKey, textarea.value);
+        if (draftIndicator) {
+          draftIndicator.style.display = 'block';
+          setTimeout(() => {
+            draftIndicator.style.display = 'none';
+          }, 2000);
+        }
+      };
+
+      // 输入时触发预览和自动保存
+      textarea.addEventListener('input', () => {
+        updatePreview();
+
+        // 防抖自动保存
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveDraft, 1000);
+      });
+
+      // 视图切换
+      const viewToggle = document.getElementById('editor-view-toggle');
+      if (viewToggle) {
+        viewToggle.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentView = btn.dataset.view;
+            viewToggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (currentView === 'edit') {
+              editorPane.style.display = 'block';
+              previewPane.style.display = 'none';
+              editorPane.style.width = '100%';
+            } else if (currentView === 'preview') {
+              editorPane.style.display = 'none';
+              previewPane.style.display = 'block';
+              previewPane.style.width = '100%';
+              updatePreview();
+            } else if (currentView === 'split') {
+              editorPane.style.display = 'block';
+              previewPane.style.display = 'block';
+              editorPane.style.width = '50%';
+              previewPane.style.width = '50%';
+              updatePreview();
+            }
+          });
+        });
+      }
+
+      // 快捷键支持
+      textarea.addEventListener('keydown', (e) => {
+        // Ctrl+S 保存
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          this._savePost();
+          return;
+        }
+
+        // Ctrl+B 加粗
+        if (e.ctrlKey && e.key === 'b') {
+          e.preventDefault();
+          this._wrapText(textarea, '**');
+          return;
+        }
+
+        // Ctrl+I 斜体
+        if (e.ctrlKey && e.key === 'i') {
+          e.preventDefault();
+          this._wrapText(textarea, '*');
+          return;
+        }
+      });
+
+      // 粘贴图片上传
+      textarea.addEventListener('paste', async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        const imageFiles = [];
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.startsWith('image/')) {
+            e.preventDefault();
+            const file = items[i].getAsFile();
+            if (file) imageFiles.push(file);
+          }
+        }
+
+        if (imageFiles.length > 0) {
+          await this._uploadMultipleImages(imageFiles, textarea);
+        }
+      });
+
+      // 拖拽上传图片
+      textarea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        textarea.style.background = 'var(--code-bg)';
+      });
+
+      textarea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        textarea.style.background = '';
+      });
+
+      textarea.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        textarea.style.background = '';
+
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) {
+          await this._uploadMultipleImages(files, textarea);
+        }
+      });
 
       document.getElementById('editor-back').addEventListener('click', () => {
-        this.currentMode = 'list';
-        this.render(document.getElementById('app-content'));
+        if (textarea.value && confirm('有未保存的内容，确定要离开吗？')) {
+          localStorage.removeItem(draftKey);
+          this.currentMode = 'list';
+          this.render(document.getElementById('app-content'));
+        } else if (!textarea.value) {
+          localStorage.removeItem(draftKey);
+          this.currentMode = 'list';
+          this.render(document.getElementById('app-content'));
+        }
       });
 
       document.getElementById('editor-save').addEventListener('click', () => {
         this._savePost();
+        // 保存成功后清除草稿
+        localStorage.removeItem(draftKey);
       });
 
       // 工具栏按钮
@@ -308,10 +467,11 @@
             }
           }
           textarea.focus();
+          textarea.dispatchEvent(new Event('input'));
         });
       });
 
-      // 图片上传
+      // 图片上传按钮
       const imageUploadBtn = document.getElementById('image-upload-btn');
       const imageFileInput = document.getElementById('image-file-input');
 
@@ -320,35 +480,50 @@
       imageFileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
-
-        this._setStatus('loading', `正在上传 ${files.length} 张图片...`);
-
-        try {
-          const token = localStorage.getItem('gh_token');
-          const uploadedUrls = [];
-
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            this._setStatus('loading', `上传中 ${i + 1}/${files.length}: ${file.name}`);
-            const url = await this._uploadImage(file, token);
-            uploadedUrls.push({ name: file.name, url });
-          }
-
-          const start = textarea.selectionStart;
-          const imageMarkdown = uploadedUrls.map(img =>
-            `![${img.name}](${img.url})`
-          ).join('\n\n');
-
-          textarea.setRangeText(imageMarkdown, start, start, 'end');
-          textarea.focus();
-
-          this._setStatus('success', `成功上传 ${files.length} 张图片！`);
-          imageFileInput.value = '';
-        } catch (err) {
-          this._setStatus('error', '上传失败: ' + err.message);
-          imageFileInput.value = '';
-        }
+        await this._uploadMultipleImages(files, textarea);
+        imageFileInput.value = '';
       });
+    },
+
+    _wrapText(textarea, wrapper) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.substring(start, end);
+
+      if (selected) {
+        textarea.setRangeText(wrapper + selected + wrapper, start, end, 'end');
+      }
+      textarea.focus();
+      textarea.dispatchEvent(new Event('input'));
+    },
+
+    async _uploadMultipleImages(files, textarea) {
+      this._setStatus('loading', `正在上传 ${files.length} 张图片...`);
+
+      try {
+        const token = localStorage.getItem('gh_token');
+        const uploadedUrls = [];
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          this._setStatus('loading', `上传中 ${i + 1}/${files.length}: ${file.name}`);
+          const url = await this._uploadImage(file, token);
+          uploadedUrls.push({ name: file.name, url });
+        }
+
+        const start = textarea.selectionStart;
+        const imageMarkdown = uploadedUrls.map(img =>
+          `![${img.name}](${img.url})`
+        ).join('\n\n');
+
+        textarea.setRangeText(imageMarkdown, start, start, 'end');
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input'));
+
+        this._setStatus('success', `成功上传 ${files.length} 张图片！`);
+      } catch (err) {
+        this._setStatus('error', '上传失败: ' + err.message);
+      }
     },
 
     async _savePost() {
