@@ -1322,6 +1322,27 @@ pre:hover .code-copy-btn { opacity: 1; }
 }
 
 .footer-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stats-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stats-icon {
+  font-size: 1rem;
+}
+
+.stats-sep {
+  margin: 0 0.5rem;
+  opacity: 0.5;
+}
   opacity: 0.5;
 }
 
