@@ -1,11 +1,11 @@
 [
   {
     "slug": "2025-12-20-SLAM入门概述",
-    "title": "SLAM 入门概述：从原理到开源方案选型",
+    "title": "SLAM 入门概述：从原理到开源方案选型0",
     "date": "2025-12-20",
     "category": "机器人",
     "tags": [],
-    "excerpt": "SLAM（Simultaneous Localization and Mapping，同时定位与建图）是移动机器人和自动驾驶的核心技术之一。本文梳理 SLAM 的基本原理和主流开源方案。…"
+    "excerpt": "SLAM 入门概述：从原理到开源方案选型\n\nSLAM（Simultaneous Localization and Mapping，同时定位与建图）是移动机器人和自动驾驶的核心技术之一。本文梳理 SLA…"
   },
   {
     "slug": "2025-12-03-JavaScript异步编程",
