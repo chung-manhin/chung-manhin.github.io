@@ -71,10 +71,11 @@
             <button data-insert="## ">H2</button>
             <button data-insert="### ">H3</button>
             <button data-insert="[](url)">链接</button>
-            <button data-insert="![](url)">图片</button>
+            <button id="image-upload-btn">📷 上传图片</button>
             <button data-insert="\`\`\`\n\n\`\`\`" data-cursor="-4">代码</button>
             <button data-insert="- ">列表</button>
           </div>
+          <input type="file" id="image-file-input" accept="image/*" style="display:none" multiple>
         </div>`;
 
       this._bindEvents();
@@ -141,6 +142,54 @@
           textarea.dispatchEvent(new Event('input'));
         });
       });
+
+      // Image upload button
+      const imageUploadBtn = document.getElementById('image-upload-btn');
+      const imageFileInput = document.getElementById('image-file-input');
+
+      if (imageUploadBtn && imageFileInput) {
+        imageUploadBtn.addEventListener('click', () => {
+          imageFileInput.click();
+        });
+
+        imageFileInput.addEventListener('change', async (e) => {
+          const files = Array.from(e.target.files);
+          if (files.length === 0) return;
+
+          this._setStatus('loading', `正在上传 ${files.length} 张图片...`);
+
+          try {
+            const token = localStorage.getItem('gh_token');
+            const uploadedUrls = [];
+
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              this._setStatus('loading', `正在上传图片 ${i + 1}/${files.length}: ${file.name}`);
+
+              const url = await this._uploadImage(file, token);
+              uploadedUrls.push({ name: file.name, url });
+            }
+
+            // Insert markdown image syntax for all uploaded images
+            const start = textarea.selectionStart;
+            const imageMarkdown = uploadedUrls.map(img =>
+              `![${img.name}](${img.url})`
+            ).join('\n\n');
+
+            textarea.setRangeText(imageMarkdown, start, start, 'end');
+            textarea.focus();
+            textarea.dispatchEvent(new Event('input'));
+
+            this._setStatus('success', `成功上传 ${files.length} 张图片！`);
+
+            // Clear file input
+            imageFileInput.value = '';
+          } catch (err) {
+            this._setStatus('error', '图片上传失败: ' + err.message);
+            imageFileInput.value = '';
+          }
+        });
+      }
     },
 
     _setStatus(type, msg) {
@@ -200,6 +249,62 @@
       } catch (e) {
         this._setStatus('error', '发布失败: ' + e.message);
       }
+    },
+
+    async _uploadImage(file, token) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('只能上传图片文件');
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        throw new Error('图片大小不能超过 5MB');
+      }
+
+      // Generate filename with timestamp to avoid conflicts
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop();
+      const filename = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const path = `image/${filename}`;
+
+      // Read file as base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Upload to GitHub
+      const body = {
+        message: `Upload image: ${filename}`,
+        content: base64,
+        branch: BRANCH
+      };
+
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `上传失败: ${res.status}`);
+      }
+
+      const result = await res.json();
+      // Return the raw GitHub content URL
+      return result.content.download_url;
     },
 
     async _githubGet(path, token) {

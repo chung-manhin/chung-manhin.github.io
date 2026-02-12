@@ -1221,6 +1221,8 @@ pre:hover .code-copy-btn { opacity: 1; }
 .editor-mobile-toolbar { display: none; position: fixed; bottom: 56px; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.4rem; gap: 0.25rem; justify-content: center; flex-wrap: wrap; z-index: 900; }
 .editor-mobile-toolbar button { background: var(--code-bg); border: 1px solid var(--border); padding: 0.35rem 0.55rem; font-size: 0.8rem; color: var(--text); cursor: pointer; font-family: var(--font-code); min-width: 32px; border-radius: 4px; }
 .editor-mobile-toolbar button:active { background: var(--accent); color: #fff; }
+.editor-mobile-toolbar #image-upload-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; font-weight: 500; }
+.editor-mobile-toolbar #image-upload-btn:active { opacity: 0.8; }
 .editor-view-toggle { display: none; gap: 0; border: 1px solid var(--border); overflow: hidden; border-radius: 6px; }
 .editor-view-toggle button { background: transparent; border: none; padding: 0.35rem 0.85rem; font-size: 0.8rem; font-family: var(--font-sans); color: var(--text-secondary); cursor: pointer; }
 .editor-view-toggle button.active { background: var(--accent); color: #fff; }
