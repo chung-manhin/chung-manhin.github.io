@@ -142,6 +142,8 @@
         await this._renderImageManager(container);
       } else if (this.currentMode === 'templates') {
         this._renderTemplates(container);
+      } else if (this.currentMode === 'seo') {
+        this._renderSEOTools(container);
       }
     },
 
@@ -178,6 +180,7 @@
               <div class="editor-actions">
                 <button class="btn btn-secondary" id="editor-images">🖼️ 图片</button>
                 <button class="btn btn-secondary" id="editor-templates">📋 模板</button>
+                <button class="btn btn-secondary" id="editor-seo">🔍 SEO</button>
                 <button class="btn btn-secondary" id="editor-logout">退出</button>
                 <button class="btn btn-primary" id="editor-new-post">✏️ 写新文章</button>
               </div>
@@ -211,6 +214,11 @@
 
       document.getElementById('editor-templates').addEventListener('click', () => {
         this.currentMode = 'templates';
+        this.render(container);
+      });
+
+      document.getElementById('editor-seo').addEventListener('click', () => {
+        this.currentMode = 'seo';
         this.render(container);
       });
 
@@ -1143,6 +1151,95 @@
           this.currentPost = { content: template.content };
           this.render(document.getElementById('app-content'));
         });
+      });
+    },
+
+    // SEO 工具
+    _renderSEOTools(container) {
+      container.innerHTML = `
+        <div class="view-container">
+          <div class="editor-page">
+            <div class="editor-top-bar">
+              <h2 style="margin: 0; font-size: 1.2rem;">🔍 SEO 工具</h2>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" id="seo-back">返回</button>
+              </div>
+            </div>
+            <div class="seo-tools">
+              <div class="seo-card">
+                <h3>📄 Sitemap.xml</h3>
+                <p>生成网站地图，帮助搜索引擎索引你的博客。</p>
+                <button class="btn btn-primary" id="generate-sitemap">生成 Sitemap</button>
+                <div id="sitemap-status" class="seo-status"></div>
+              </div>
+              <div class="seo-card">
+                <h3>📡 RSS Feed</h3>
+                <p>生成 RSS 订阅源，让读者订阅你的博客更新。</p>
+                <button class="btn btn-primary" id="generate-rss">生成 RSS</button>
+                <div id="rss-status" class="seo-status"></div>
+              </div>
+              <div class="seo-card">
+                <h3>🤖 robots.txt</h3>
+                <p>robots.txt 已存在，控制搜索引擎爬虫行为。</p>
+                <a href="/robots.txt" target="_blank" class="btn btn-secondary">查看 robots.txt</a>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('seo-back').addEventListener('click', () => {
+        this.currentMode = 'list';
+        this.render(container);
+      });
+
+      document.getElementById('generate-sitemap').addEventListener('click', async () => {
+        const btn = document.getElementById('generate-sitemap');
+        const status = document.getElementById('sitemap-status');
+        const token = localStorage.getItem('gh_token');
+
+        try {
+          btn.disabled = true;
+          btn.textContent = '生成中...';
+          status.textContent = '正在生成 sitemap.xml...';
+          status.className = 'seo-status loading';
+
+          await window.SitemapGenerator.save(token);
+
+          status.textContent = '✓ Sitemap 生成成功！';
+          status.className = 'seo-status success';
+          btn.textContent = '重新生成';
+        } catch (err) {
+          status.textContent = '✗ 生成失败: ' + err.message;
+          status.className = 'seo-status error';
+          btn.textContent = '重试';
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById('generate-rss').addEventListener('click', async () => {
+        const btn = document.getElementById('generate-rss');
+        const status = document.getElementById('rss-status');
+        const token = localStorage.getItem('gh_token');
+
+        try {
+          btn.disabled = true;
+          btn.textContent = '生成中...';
+          status.textContent = '正在生成 rss.xml...';
+          status.className = 'seo-status loading';
+
+          await window.RSSGenerator.save(token);
+
+          status.textContent = '✓ RSS 生成成功！';
+          status.className = 'seo-status success';
+          btn.textContent = '重新生成';
+        } catch (err) {
+          status.textContent = '✗ 生成失败: ' + err.message;
+          status.className = 'seo-status error';
+          btn.textContent = '重试';
+        } finally {
+          btn.disabled = false;
+        }
       });
     },
 

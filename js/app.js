@@ -27,6 +27,7 @@
     initThemeToggle();
     initStickyHeader();
     initReadingProgress();
+    initBackToTop();
     await loadPosts();
     initScrollReveal();
     window.addEventListener('hashchange', onRoute);
@@ -82,6 +83,32 @@
     window.addEventListener('hashchange', () => { bar.style.width = '0%'; });
   }
 
+  /* ── Back to Top Button ── */
+  function initBackToTop() {
+    // 创建按钮
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>';
+    btn.setAttribute('aria-label', '返回顶部');
+    document.body.appendChild(btn);
+
+    // 滚动显示/隐藏
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        btn.classList.toggle('show', window.scrollY > 300);
+        ticking = false;
+      });
+    }, { passive: true });
+
+    // 点击返回顶部
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
   /* ── Router ── */
   function onRoute() {
     const hash = location.hash || '#/';
@@ -100,7 +127,7 @@
       case 'tags': renderTags(); break;
       case 'about': renderAbout(); break;
       case 'editor': renderEditor(); break;
-      default: renderHome();
+      default: render404();
     }
     window.scrollTo(0, 0);
   }
@@ -145,7 +172,7 @@
   async function renderPost(slug) {
     const post = postsData.find(p => p.slug === slug);
     if (!post) {
-      contentEl().innerHTML = '<div class="view-container"><div class="article-header"><h1 class="article-title">\u6587\u7AE0\u672A\u627E\u5230</h1></div></div>';
+      render404();
       return;
     }
     document.title = `${post.title} | ${SITE.title}`;
@@ -157,6 +184,9 @@
       const md = await res.text();
       const html = marked.parse(md);
       const tags = post.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+      // 计算阅读时间（中文按字数，英文按单词数）
+      const readingTime = calculateReadingTime(md);
 
       // Prev / Next post navigation
       const idx = postsData.indexOf(post);
@@ -202,6 +232,7 @@
             <div class="article-meta">
               <span>${formatDate(post.date)}</span>
               <span>${SITE.author}</span>
+              <span>${readingTime}</span>
             </div>
             <div class="article-tags">${tags}</div>
             <div class="article-share">
@@ -261,10 +292,18 @@
       // 分享功能
       setupShareButtons(post);
 
-      // Image lightbox
+      // Image lightbox & lazy loading
       document.querySelectorAll('.article-body img').forEach(img => {
         img.style.cursor = 'zoom-in';
         img.addEventListener('click', () => openLightbox(img.src));
+
+        // 懒加载
+        if ('loading' in HTMLImageElement.prototype) {
+          img.loading = 'lazy';
+        } else {
+          // 降级方案：使用 IntersectionObserver
+          lazyLoadImage(img);
+        }
       });
 
       loadGiscus(post.slug);
@@ -391,6 +430,61 @@
     document.title = `\u7F16\u8F91\u5668 | ${SITE.title}`;
     if (window.BlogEditor) { window.BlogEditor.render(contentEl()); }
     else { contentEl().innerHTML = '<div class="view-container"><p style="padding:3rem;text-align:center">\u7F16\u8F91\u5668\u6A21\u5757\u52A0\u8F7D\u4E2D\u2026</p></div>'; }
+  }
+
+  /* ── 404 Page ── */
+  function render404() {
+    document.title = `404 | ${SITE.title}`;
+    contentEl().innerHTML = `
+      <div class="view-container">
+        <div class="page-404">
+          <div class="error-code">404</div>
+          <h1 class="error-title">页面未找到</h1>
+          <p class="error-desc">抱歉，您访问的页面不存在或已被移除。</p>
+          <div class="error-actions">
+            <a href="#/" class="btn-primary">返回首页</a>
+            <a href="#/archives" class="btn-secondary">浏览归档</a>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ── Reading Time Calculation ── */
+  function calculateReadingTime(markdown) {
+    // 移除代码块和 markdown 语法
+    const text = markdown
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`[^`]*`/g, '')
+      .replace(/[#*_~\[\]()]/g, '');
+
+    // 中文字符数
+    const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+    // 英文单词数
+    const englishWords = (text.match(/[a-zA-Z]+/g) || []).length;
+
+    // 中文 400 字/分钟，英文 200 词/分钟
+    const minutes = Math.ceil(chineseChars / 400 + englishWords / 200);
+    return `约 ${minutes} 分钟`;
+  }
+
+  /* ── Lazy Load Image (fallback) ── */
+  function lazyLoadImage(img) {
+    if (!('IntersectionObserver' in window)) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const lazyImg = entry.target;
+          if (lazyImg.dataset.src) {
+            lazyImg.src = lazyImg.dataset.src;
+            lazyImg.removeAttribute('data-src');
+          }
+          observer.unobserve(lazyImg);
+        }
+      });
+    });
+
+    observer.observe(img);
   }
 
   /* ── Dark Mode ── */

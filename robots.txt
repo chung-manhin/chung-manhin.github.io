@@ -1,0 +1,9 @@
+# robots.txt for WZ's Log
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://wenxuanzhong.github.io/sitemap.xml
+
+# Disallow editor page from search engines
+Disallow: /#/editor
