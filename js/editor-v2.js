@@ -203,9 +203,24 @@
           await this._githubDelete(`posts/${post.slug}.md`, mdRes.sha, `Delete post: ${post.title}`, token);
         }
 
-        // 2. 更新 posts.json
-        this.allPosts.splice(idx, 1);
-        await this._savePosts(token);
+        // 2. 重新加载最新的 posts.json（关键：避免 SHA 冲突）
+        const postsJsonRes = await this._githubGet('posts.json', token);
+        let latestPosts = [];
+        if (postsJsonRes) {
+          const postsContent = base64DecodeUnicode(postsJsonRes.content.replace(/\n/g, ''));
+          latestPosts = JSON.parse(postsContent);
+        }
+
+        // 3. 从列表中移除该文章
+        latestPosts = latestPosts.filter(p => p.slug !== post.slug);
+
+        // 4. 保存 posts.json（使用最新的 SHA）
+        const postsJsonSha = postsJsonRes ? postsJsonRes.sha : undefined;
+        const postsContent = JSON.stringify(latestPosts, null, 2);
+        await this._githubPut('posts.json', postsContent, `Update posts.json: delete ${post.title}`, token, postsJsonSha);
+
+        // 5. 更新本地缓存
+        this.allPosts = latestPosts;
 
         this._setStatus('success', '删除成功！');
         setTimeout(() => {
@@ -366,20 +381,37 @@
         const mdSha = mdRes ? mdRes.sha : undefined;
         await this._githubPut(filePath, content, `${isNew ? 'Add' : 'Update'} post: ${title}`, token, mdSha);
 
-        // 2. 更新 posts.json
-        await this._loadPosts(token);
+        // 2. 重新加载最新的 posts.json（关键：避免 SHA 冲突）
+        const postsJsonRes = await this._githubGet('posts.json', token);
+        let latestPosts = [];
+        if (postsJsonRes) {
+          const postsContent = base64DecodeUnicode(postsJsonRes.content.replace(/\n/g, ''));
+          latestPosts = JSON.parse(postsContent);
+        }
+
+        // 3. 更新或添加文章
+        const postData = { slug, title, date: isNew ? today : (this.currentPost?.date || today), category, tags, excerpt };
 
         if (isNew) {
-          this.allPosts.push({ slug, title, date: today, category, tags, excerpt });
+          latestPosts.push(postData);
         } else {
-          const idx = this.allPosts.findIndex(p => p.slug === slug);
+          const idx = latestPosts.findIndex(p => p.slug === slug);
           if (idx >= 0) {
-            this.allPosts[idx] = { slug, title, date: this.allPosts[idx].date, category, tags, excerpt };
+            latestPosts[idx] = postData;
+          } else {
+            latestPosts.push(postData);
           }
         }
 
-        this.allPosts.sort((a, b) => b.date.localeCompare(a.date));
-        await this._savePosts(token);
+        latestPosts.sort((a, b) => b.date.localeCompare(a.date));
+
+        // 4. 保存 posts.json（使用最新的 SHA）
+        const postsJsonSha = postsJsonRes ? postsJsonRes.sha : undefined;
+        const postsContent = JSON.stringify(latestPosts, null, 2);
+        await this._githubPut('posts.json', postsContent, `Update posts.json: ${isNew ? 'add' : 'update'} ${title}`, token, postsJsonSha);
+
+        // 5. 更新本地缓存
+        this.allPosts = latestPosts;
 
         this._setStatus('success', '保存成功！');
         setTimeout(() => {
@@ -390,13 +422,6 @@
       } catch (err) {
         this._setStatus('error', '保存失败: ' + err.message);
       }
-    },
-
-    async _savePosts(token) {
-      const postsJsonRes = await this._githubGet('posts.json', token);
-      const postsJsonSha = postsJsonRes ? postsJsonRes.sha : undefined;
-      const content = JSON.stringify(this.allPosts, null, 2);
-      await this._githubPut('posts.json', content, 'Update posts.json', token, postsJsonSha);
     },
 
     async _uploadImage(file, token) {
