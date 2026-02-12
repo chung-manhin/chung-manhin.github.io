@@ -83,6 +83,15 @@
                 <button class="btn btn-primary" id="editor-new-post">✏️ 写新文章</button>
               </div>
             </div>
+            <div class="posts-filter-bar">
+              <input type="text" id="posts-search" class="posts-search-input" placeholder="🔍 搜索文章标题...">
+              <select id="posts-sort" class="posts-sort-select">
+                <option value="date-desc">日期 ↓</option>
+                <option value="date-asc">日期 ↑</option>
+                <option value="title-asc">标题 A-Z</option>
+                <option value="title-desc">标题 Z-A</option>
+              </select>
+            </div>
             <div id="posts-list-container" class="posts-list">
               <div class="loading-spinner"></div>
             </div>
@@ -101,12 +110,50 @@
         this.render(container);
       });
 
+      // 搜索功能
+      document.getElementById('posts-search').addEventListener('input', (e) => {
+        this._filterAndRenderPosts(e.target.value, document.getElementById('posts-sort').value);
+      });
+
+      // 排序功能
+      document.getElementById('posts-sort').addEventListener('change', (e) => {
+        this._filterAndRenderPosts(document.getElementById('posts-search').value, e.target.value);
+      });
+
       try {
         await this._loadPosts(token);
-        this._renderPostsTable();
+        this._filterAndRenderPosts('', 'date-desc');
       } catch (err) {
         this._setStatus('error', '加载文章列表失败: ' + err.message);
       }
+    },
+
+    _filterAndRenderPosts(searchTerm, sortBy) {
+      let filtered = this.allPosts;
+
+      // 搜索过滤
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(p =>
+          p.title.toLowerCase().includes(term) ||
+          p.category.toLowerCase().includes(term) ||
+          p.tags.some(t => t.toLowerCase().includes(term))
+        );
+      }
+
+      // 排序
+      filtered = [...filtered];
+      if (sortBy === 'date-desc') {
+        filtered.sort((a, b) => b.date.localeCompare(a.date));
+      } else if (sortBy === 'date-asc') {
+        filtered.sort((a, b) => a.date.localeCompare(b.date));
+      } else if (sortBy === 'title-asc') {
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (sortBy === 'title-desc') {
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+      }
+
+      this._renderPostsTable(filtered);
     },
 
     async _loadPosts(token) {
@@ -119,10 +166,10 @@
       }
     },
 
-    _renderPostsTable() {
+    _renderPostsTable(posts = this.allPosts) {
       const container = document.getElementById('posts-list-container');
-      if (this.allPosts.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">还没有文章，点击右上角开始写作吧！</p>';
+      if (posts.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">没有找到文章</p>';
         return;
       }
 
@@ -137,7 +184,9 @@
             </tr>
           </thead>
           <tbody>
-            ${this.allPosts.map((post, idx) => `
+            ${posts.map((post) => {
+              const idx = this.allPosts.findIndex(p => p.slug === post.slug);
+              return `
               <tr>
                 <td class="post-title">${this._escapeHtml(post.title)}</td>
                 <td>${post.date}</td>
@@ -146,8 +195,8 @@
                   <button class="btn-small btn-edit" data-idx="${idx}">编辑</button>
                   <button class="btn-small btn-delete" data-idx="${idx}">删除</button>
                 </td>
-              </tr>
-            `).join('')}
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>`;
 
@@ -274,6 +323,9 @@
             <div class="draft-indicator" id="draft-indicator" style="display:none;">
               <span>📝 草稿已自动保存</span>
             </div>
+            <div class="word-count" id="word-count">
+              <span id="word-count-text">0 字</span>
+            </div>
           </div>
           <div class="editor-mobile-toolbar" id="editor-toolbar">
             <button data-insert="**" data-wrap="true">B</button>
@@ -297,6 +349,7 @@
       const editorPane = document.getElementById('editor-pane');
       const previewPane = document.getElementById('preview-pane');
       const draftIndicator = document.getElementById('draft-indicator');
+      const wordCountText = document.getElementById('word-count-text');
 
       let autoSaveTimer = null;
       let currentView = 'edit';
@@ -304,6 +357,15 @@
       // 草稿键
       const post = this.currentPost || {};
       const draftKey = `draft_${post.slug || 'new'}`;
+
+      // 更新字数统计
+      const updateWordCount = () => {
+        const text = textarea.value;
+        const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+        const englishWords = (text.match(/[a-zA-Z]+/g) || []).length;
+        const total = chineseChars + englishWords;
+        wordCountText.textContent = `${total} 字`;
+      };
 
       // 实时预览
       const updatePreview = () => {
@@ -329,11 +391,15 @@
       // 输入时触发预览和自动保存
       textarea.addEventListener('input', () => {
         updatePreview();
+        updateWordCount();
 
         // 防抖自动保存
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(saveDraft, 1000);
       });
+
+      // 初始化字数统计
+      updateWordCount();
 
       // 视图切换
       const viewToggle = document.getElementById('editor-view-toggle');
