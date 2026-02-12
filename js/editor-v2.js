@@ -357,6 +357,7 @@
                 <td class="post-actions">
                   <button class="btn-small btn-preview" data-slug="${post.slug}">预览</button>
                   <button class="btn-small btn-edit" data-idx="${idx}">编辑</button>
+                  <button class="btn-small btn-history" data-slug="${post.slug}">历史</button>
                   <button class="btn-small btn-delete" data-idx="${idx}">删除</button>
                 </td>
               </tr>`;
@@ -397,6 +398,14 @@
         btn.addEventListener('click', async () => {
           const idx = parseInt(btn.dataset.idx);
           await this._editPost(idx);
+        });
+      });
+
+      // 绑定历史按钮
+      container.querySelectorAll('.btn-history').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const slug = btn.dataset.slug;
+          await this._showHistory(slug);
         });
       });
 
@@ -1135,6 +1144,156 @@
           this.render(document.getElementById('app-content'));
         });
       });
+    },
+
+    // 版本历史
+    async _showHistory(slug) {
+      const token = localStorage.getItem('gh_token');
+      const container = document.getElementById('app-content');
+
+      container.innerHTML = `
+        <div class="view-container">
+          <div class="editor-page">
+            <div class="editor-top-bar">
+              <h2 style="margin: 0; font-size: 1.2rem;">📜 版本历史</h2>
+              <div class="editor-actions">
+                <button class="btn btn-secondary" id="history-back">返回</button>
+              </div>
+            </div>
+            <div id="history-container" class="history-list">
+              <div class="loading-spinner"></div>
+            </div>
+            <div id="editor-status" class="editor-status"></div>
+          </div>
+        </div>`;
+
+      document.getElementById('history-back').addEventListener('click', () => {
+        this.currentMode = 'list';
+        this.render(container);
+      });
+
+      try {
+        this._setStatus('loading', '加载历史记录...');
+
+        // 获取文件的 commit 历史
+        const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?path=posts/${slug}.md&per_page=20`, {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (!res.ok) throw new Error('获取历史失败');
+
+        const commits = await res.json();
+
+        if (commits.length === 0) {
+          document.getElementById('history-container').innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">没有历史记录</p>';
+          this._setStatus('', '');
+          return;
+        }
+
+        const html = commits.map(commit => {
+          const date = new Date(commit.commit.author.date);
+          const dateStr = date.toLocaleString('zh-CN');
+
+          return `
+            <div class="history-item">
+              <div class="history-info">
+                <div class="history-message">${this._escapeHtml(commit.commit.message)}</div>
+                <div class="history-meta">
+                  <span>${this._escapeHtml(commit.commit.author.name)}</span>
+                  <span>•</span>
+                  <span>${dateStr}</span>
+                </div>
+              </div>
+              <button class="btn-small" data-sha="${commit.sha}" data-slug="${slug}">查看此版本</button>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('history-container').innerHTML = html;
+        this._setStatus('success', `共 ${commits.length} 条历史记录`);
+
+        // 绑定查看版本按钮
+        document.querySelectorAll('.history-item button').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const sha = btn.dataset.sha;
+            const slug = btn.dataset.slug;
+            await this._viewHistoryVersion(slug, sha);
+          });
+        });
+
+      } catch (err) {
+        this._setStatus('error', '加载失败: ' + err.message);
+      }
+    },
+
+    async _viewHistoryVersion(slug, sha) {
+      const token = localStorage.getItem('gh_token');
+
+      try {
+        this._setStatus('loading', '加载版本内容...');
+
+        const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/posts/${slug}.md?ref=${sha}`, {
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (!res.ok) throw new Error('获取版本失败');
+
+        const data = await res.json();
+        const content = base64DecodeUnicode(data.content.replace(/\n/g, ''));
+
+        // 显示历史版本（只读模式）
+        const container = document.getElementById('app-content');
+        container.innerHTML = `
+          <div class="view-container">
+            <div class="editor-page">
+              <div class="editor-top-bar">
+                <h2 style="margin: 0; font-size: 1.2rem;">📜 历史版本（只读）</h2>
+                <div class="editor-actions">
+                  <button class="btn btn-secondary" id="version-back">返回历史</button>
+                  <button class="btn btn-primary" id="version-restore">恢复此版本</button>
+                </div>
+              </div>
+              <div class="editor-body">
+                <div class="preview-pane" style="display: block; width: 100%;">
+                  <div class="preview-content" id="version-preview"></div>
+                </div>
+              </div>
+            </div>
+          </div>`;
+
+        const preview = document.getElementById('version-preview');
+        preview.innerHTML = marked.parse(content);
+        preview.querySelectorAll('pre code').forEach(block => {
+          if (window.hljs) hljs.highlightElement(block);
+        });
+
+        document.getElementById('version-back').addEventListener('click', () => {
+          this._showHistory(slug);
+        });
+
+        document.getElementById('version-restore').addEventListener('click', () => {
+          if (confirm('确定要恢复到这个版本吗？这将覆盖当前内容。')) {
+            // 找到对应的文章
+            const post = this.allPosts.find(p => p.slug === slug);
+            if (post) {
+              this.currentMode = 'edit';
+              this.currentPost = { ...post, content };
+              this.render(container);
+            }
+          }
+        });
+
+        this._setStatus('', '');
+
+      } catch (err) {
+        this._setStatus('error', '加载失败: ' + err.message);
+      }
     }
   };
 

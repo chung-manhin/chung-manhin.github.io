@@ -1267,6 +1267,14 @@ pre:hover .code-copy-btn { opacity: 1; }
 .template-preview { background: var(--code-bg); padding: 1rem; border-radius: 6px; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary); overflow: hidden; margin-bottom: 1rem; max-height: 200px; }
 .template-card button { width: 100%; }
 
+/* 版本历史 */
+.history-list { padding: 1rem; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.75rem; gap: 1rem; }
+.history-info { flex: 1; }
+.history-message { font-size: 0.95rem; color: var(--text); margin-bottom: 0.5rem; font-weight: 500; }
+.history-meta { font-size: 0.8rem; color: var(--text-secondary); display: flex; gap: 0.5rem; }
+.history-item button { white-space: nowrap; }
+
 .token-setup { max-width: 420px; margin: 3rem auto; padding: 2rem; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .token-setup h2 { font-family: var(--font-sans); color: var(--text); margin-bottom: 0.75rem; font-size: 1.2rem; }
 .token-setup p { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.88rem; line-height: 1.6; }
@@ -1356,6 +1364,9 @@ pre:hover .code-copy-btn { opacity: 1; }
 
   .images-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; padding: 0.75rem; }
   .templates-list { grid-template-columns: 1fr; padding: 1rem; }
+
+  .history-item { flex-direction: column; align-items: stretch; }
+  .history-item button { width: 100%; }
 
   .word-count { left: 10px; bottom: 70px; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
   .draft-indicator { right: 10px; bottom: 70px; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
