@@ -192,6 +192,7 @@
                 <td>${post.date}</td>
                 <td>${this._escapeHtml(post.category)}</td>
                 <td class="post-actions">
+                  <button class="btn-small btn-preview" data-slug="${post.slug}">预览</button>
                   <button class="btn-small btn-edit" data-idx="${idx}">编辑</button>
                   <button class="btn-small btn-delete" data-idx="${idx}">删除</button>
                 </td>
@@ -201,6 +202,14 @@
         </table>`;
 
       container.innerHTML = html;
+
+      // 绑定预览按钮
+      container.querySelectorAll('.btn-preview').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const slug = btn.dataset.slug;
+          window.location.hash = `#/post/${encodeURIComponent(slug)}`;
+        });
+      });
 
       // 绑定编辑按钮
       container.querySelectorAll('.btn-edit').forEach(btn => {
@@ -328,14 +337,17 @@
             </div>
           </div>
           <div class="editor-mobile-toolbar" id="editor-toolbar">
-            <button data-insert="**" data-wrap="true">B</button>
-            <button data-insert="*" data-wrap="true">I</button>
-            <button data-insert="## ">H2</button>
-            <button data-insert="### ">H3</button>
-            <button data-insert="[](url)">链接</button>
-            <button id="image-upload-btn">📷 图片</button>
-            <button data-insert="\`\`\`\n\n\`\`\`" data-cursor="-4">代码</button>
-            <button data-insert="- ">列表</button>
+            <button data-insert="**" data-wrap="true" title="加粗">B</button>
+            <button data-insert="*" data-wrap="true" title="斜体">I</button>
+            <button data-insert="## " title="二级标题">H2</button>
+            <button data-insert="### " title="三级标题">H3</button>
+            <button data-insert="> " title="引用">引用</button>
+            <button data-insert="[](url)" title="链接">链接</button>
+            <button id="image-upload-btn" title="上传图片">📷 图片</button>
+            <button data-insert="\`\`\`\n\n\`\`\`" data-cursor="-4" title="代码块">代码</button>
+            <button data-insert="- " title="无序列表">列表</button>
+            <button data-insert="1. " title="有序列表">序号</button>
+            <button id="export-btn" title="导出 Markdown">💾 导出</button>
           </div>
           <input type="file" id="image-file-input" accept="image/*" style="display:none" multiple>
         </div>`;
@@ -518,7 +530,7 @@
 
       // 工具栏按钮
       document.querySelectorAll('#editor-toolbar button').forEach(btn => {
-        if (btn.id === 'image-upload-btn') return;
+        if (btn.id === 'image-upload-btn' || btn.id === 'export-btn') return;
 
         btn.addEventListener('click', () => {
           const insert = btn.dataset.insert;
@@ -540,6 +552,23 @@
           textarea.dispatchEvent(new Event('input'));
         });
       });
+
+      // 导出按钮
+      const exportBtn = document.getElementById('export-btn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          const title = document.getElementById('editor-title').value.trim() || 'untitled';
+          const content = textarea.value;
+          const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${title}.md`;
+          a.click();
+          URL.revokeObjectURL(url);
+          this._setStatus('success', '导出成功！');
+        });
+      }
 
       // 图片上传按钮
       const imageUploadBtn = document.getElementById('image-upload-btn');

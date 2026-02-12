@@ -1218,11 +1218,13 @@ pre:hover .code-copy-btn { opacity: 1; }
 .preview-content ul, .preview-content ol { padding-left: 1.4rem; margin-bottom: 0.85rem; }
 .preview-content blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 1rem 0; color: var(--text-secondary); font-style: italic; }
 
-.editor-mobile-toolbar { display: none; position: fixed; bottom: 56px; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.4rem; gap: 0.25rem; justify-content: center; flex-wrap: wrap; z-index: 900; }
-.editor-mobile-toolbar button { background: var(--code-bg); border: 1px solid var(--border); padding: 0.35rem 0.55rem; font-size: 0.8rem; color: var(--text); cursor: pointer; font-family: var(--font-code); min-width: 32px; border-radius: 4px; }
+.editor-mobile-toolbar { display: none; position: fixed; bottom: 56px; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.4rem; gap: 0.25rem; justify-content: center; flex-wrap: wrap; z-index: 900; overflow-x: auto; }
+.editor-mobile-toolbar button { background: var(--code-bg); border: 1px solid var(--border); padding: 0.35rem 0.55rem; font-size: 0.75rem; color: var(--text); cursor: pointer; font-family: var(--font-code); min-width: 32px; border-radius: 4px; white-space: nowrap; }
 .editor-mobile-toolbar button:active { background: var(--accent); color: #fff; }
 .editor-mobile-toolbar #image-upload-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; font-weight: 500; }
 .editor-mobile-toolbar #image-upload-btn:active { opacity: 0.8; }
+.editor-mobile-toolbar #export-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #fff; border: none; font-weight: 500; }
+.editor-mobile-toolbar #export-btn:active { opacity: 0.8; }
 .editor-view-toggle { display: flex; gap: 0; border: 1px solid var(--border); overflow: hidden; border-radius: 6px; }
 .editor-view-toggle button { background: transparent; border: none; padding: 0.35rem 0.85rem; font-size: 0.8rem; font-family: var(--font-sans); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
 .editor-view-toggle button.active { background: var(--accent); color: #fff; }
@@ -1230,8 +1232,8 @@ pre:hover .code-copy-btn { opacity: 1; }
 
 .editor-body { display: flex; gap: 0; height: 100%; overflow: hidden; }
 .editor-pane { flex: 1; display: flex; flex-direction: column; transition: all 0.3s; min-width: 0; }
-.preview-pane { flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--border); transition: all 0.3s; min-width: 0; display: flex; justify-content: center; }
-.preview-content { width: 100%; max-width: 720px; min-height: 100%; }
+.preview-pane { flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--border); transition: all 0.3s; min-width: 0; }
+.preview-content { width: 100%; max-width: 720px; min-height: 100%; margin: 0 auto; }
 .preview-content img { max-width: 100%; height: auto; border-radius: 8px; }
 
 .draft-indicator { position: fixed; bottom: 80px; right: 20px; background: rgba(34,197,94,0.9); color: #fff; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; z-index: 1000; animation: fadeInOut 2s; }
@@ -1268,9 +1270,12 @@ pre:hover .code-copy-btn { opacity: 1; }
 .posts-table tbody tr:hover { background: var(--code-bg); }
 .posts-table .post-title { font-weight: 500; color: var(--text); }
 .posts-table .post-actions { display: flex; gap: 0.5rem; }
-.btn-small { padding: 0.3rem 0.6rem; font-size: 0.8rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; border-radius: 4px; font-family: var(--font-sans); }
+.btn-small { padding: 0.3rem 0.6rem; font-size: 0.8rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; border-radius: 4px; font-family: var(--font-sans); transition: all 0.2s; }
 .btn-small:hover { background: var(--code-bg); }
+.btn-preview { border-color: #3b82f6; color: #3b82f6; }
+.btn-preview:hover { background: rgba(59,130,246,0.08); }
 .btn-edit { border-color: var(--accent); color: var(--accent); }
+.btn-edit:hover { background: rgba(102,126,234,0.08); }
 .btn-delete { border-color: #dc2626; color: #dc2626; }
 .btn-delete:hover { background: rgba(239,68,68,0.08); }
 
