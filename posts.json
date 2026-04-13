@@ -8,18 +8,6 @@
     "excerpt": "学习目标\n\n 把 ROS1 的小乌龟速度控制例子改成 ROS 2 Jazzy\n 在 WSL 里完成编译、运行和调试\n 记录这次遇到的问题和解决过程，方便以后少踩坑\n\n 核心概念\n\n ROS1 和 RO…"
   },
   {
-    "slug": "2025-12-03-JavaScript异步编程",
-    "title": "JavaScript 异步编程：Promise、async/await 深度解析",
-    "date": "2025-12-03",
-    "category": "前端",
-    "tags": [
-      "JavaScript",
-      "异步",
-      "前端"
-    ],
-    "excerpt": "JavaScript 是单线程语言，异步编程是它的核心特性。从回调函数到 Promise 再到 async/await，异步方案在不断进化。…"
-  },
-  {
     "slug": "2025-11-15-PID控制入门",
     "title": "PID 控制入门：从理论到电机调速实战",
     "date": "2025-11-15",
