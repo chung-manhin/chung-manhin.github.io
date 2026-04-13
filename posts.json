@@ -1,11 +1,11 @@
 [
   {
     "slug": "2026-04-13-# 学习笔记：WSL 下跑 ROS 2 Jazzy 控制 turtlesim 的踩坑记录",
-    "title": "学习笔记：ROS课程实验报告2 WSL 下跑 ROS 2 Jazzy 控制 turtlesim 的踩坑记录",
+    "title": "# 学习笔记：WSL 下跑 ROS 2 Jazzy 控制 turtlesim 的踩坑记录",
     "date": "2026-04-13",
     "category": "技术",
     "tags": [],
-    "excerpt": "学习笔记：WSL 下跑 ROS 2 Jazzy 控制 turtlesim 的踩坑记录\n\n 学习目标\n\n 把 ROS1 的小乌龟速度控制例子改成 ROS 2 Jazzy\n 在 WSL 里完成编译、运行和…"
+    "excerpt": "学习目标\n\n 把 ROS1 的小乌龟速度控制例子改成 ROS 2 Jazzy\n 在 WSL 里完成编译、运行和调试\n 记录这次遇到的问题和解决过程，方便以后少踩坑\n\n 核心概念\n\n ROS1 和 RO…"
   },
   {
     "slug": "2025-11-01-Git进阶操作",
